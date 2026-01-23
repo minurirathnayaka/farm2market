@@ -1,0 +1,215 @@
+/* ================= OVERLAY ================= */
+.auth-overlay {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+
+  background: rgba(0,0,0,0.25);
+  backdrop-filter: blur(14px) saturate(120%);
+  -webkit-backdrop-filter: blur(14px) saturate(120%);
+
+  z-index: 10000;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont,
+               'Segoe UI', Roboto, sans-serif;
+}
+
+.auth-overlay.show {
+  display: flex;
+}
+
+/* ================= POPUP SWITCH ================= */
+.auth-popup {
+  display: none;
+}
+
+.auth-popup.active {
+  display: block;
+}
+
+/* ================= CONTAINER ================= */
+.login-container {
+  width: 100%;
+  max-width: 420px;
+}
+
+/* ================= CARD ================= */
+.login-card {
+  background: rgba(255,255,255,0.1);
+  backdrop-filter: blur(20px);
+  border-radius: 24px;
+  padding: 40px;
+  border: 1px solid rgba(255,255,255,0.2);
+
+  box-shadow:
+    0 30px 60px rgba(0,0,0,0.35),
+    inset 0 1px 1px rgba(255,255,255,0.35);
+
+  color: white;
+}
+
+/* ================= HEADER ================= */
+.login-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.login-header h2 {
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.login-header p {
+  opacity: 0.8;
+}
+
+/* ================= FORM SPACING ================= */
+.form-group {
+  margin-bottom: 24px;
+}
+
+.login-form .form-group:last-of-type {
+  margin-bottom: 8px;
+}
+
+/* ================= INPUTS ================= */
+.input-wrapper {
+  position: relative;
+}
+
+.input-wrapper input {
+  width: 100%;
+  padding: 16px 16px 8px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 12px;
+  color: white;
+  outline: none;
+}
+
+.input-wrapper label {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  color: white;
+  opacity: 0.7;
+  transition: 0.25s ease;
+  pointer-events: none;
+}
+
+.input-wrapper input:focus + label,
+.input-wrapper input:valid + label {
+  transform: translateY(-8px) scale(0.85);
+  color: #06b6d4;
+}
+
+/* ================= FORM OPTIONS (THIS WAS MISSING) ================= */
+.form-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 30px 0 40px;
+}
+
+/* ================= REMEMBER ME ================= */
+.remember-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.remember-wrapper input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+}
+
+.remember-wrapper label {
+  color: white;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+/* ================= BUTTONS (WHITE) ================= */
+.btn {
+  width: 100%;
+  padding: 16px;
+  border-radius: 12px;
+  border: none;
+
+  background: rgba(255,255,255,0.95);
+  color: #111;
+
+  font-weight: 600;
+  cursor: pointer;
+
+  transition: all 0.25s ease;
+  box-shadow:
+    0 8px 20px rgba(0,0,0,0.25),
+    inset 0 1px 1px rgba(255,255,255,0.6);
+}
+
+.btn:hover {
+  background: rgba(255,255,255,1);
+  transform: translateY(-1px);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+/* ================= LINKS ================= */
+.auth-overlay a,
+.auth-overlay a:visited {
+  color: white !important;
+  text-decoration: none;
+}
+
+.auth-overlay a:hover {
+  color: #06b6d4 !important;
+  text-decoration: underline;
+}
+
+.auth-overlay .forgot-password {
+  color: white !important;
+  font-size: 13px;
+}
+
+/* ================= SIGNUP / LOGIN SWITCH ================= */
+.signup-link {
+  text-align: center;
+}
+
+.signup-link p {
+  color: rgba(255,255,255,0.85);
+}
+
+/* ================= SUCCESS ================= */
+.success-message {
+  display: none;
+  text-align: center;
+}
+
+.success-message.show {
+  display: block;
+}
+
+.input-wrapper select {
+  width: 100%;
+  padding: 16px 16px 8px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 12px;
+  color: white;
+  outline: none;
+  appearance: none;
+}
+
+.input-wrapper select:focus + label,
+.input-wrapper select:not([value=""]) + label {
+  transform: translateY(-8px) scale(0.85);
+  color: #000000;
+}

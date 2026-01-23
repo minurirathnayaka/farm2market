@@ -1,0 +1,248 @@
+/* =========================
+   LIQUID GLASS BASE
+========================= */
+
+.glass {
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.45),
+    rgba(150, 155, 161, 0.30)
+  );
+
+  backdrop-filter: blur(14px) saturate(180%);
+  -webkit-backdrop-filter: blur(14px) saturate(180%);
+
+  border: 1px solid rgba(255, 255, 255, 0.35);
+
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.6) inset,
+    0 8px 20px rgba(0,0,0,0.12);
+}
+
+/* =========================
+   NAV GLASS ISLAND
+========================= */
+
+.nav-glass {
+  display: flex;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+}
+
+
+.nav-glass.glass {
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.6) inset,
+    0 12px 28px rgba(0,0,0,0.14);
+}
+
+.nav-glass .nav-link {
+  padding: 6px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 999px;
+  color: var(--text-dark);
+}
+
+.nav-glass .nav-link:hover {
+  background: rgba(255,255,255,0.35);
+}
+
+/* =========================
+   HEADER AUTH ISLAND
+========================= */
+
+.header-buttons {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border-radius: 999px;
+}
+
+.header-buttons.glass {
+  padding: 6px;
+  border-radius: 999px;
+
+  /* FIX: reduce opacity to avoid bleed */
+  background: rgba(255,255,255,0.28);
+
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+
+  border: 1px solid rgba(255,255,255,0.3);
+}
+
+.header-buttons .btn {
+  padding: 8px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-dark);
+}
+
+.header-buttons .btn:hover {
+  background: rgba(255,255,255,0.35);
+}
+
+/* =========================
+   AVATAR
+========================= */
+
+.avatar-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+
+  /* solid content layer */
+  background: #7f7f7f52;
+
+  border: none;
+  box-shadow: none;
+
+  color: #1b5e20;
+  font-weight: 700;
+  font-size: 13px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+/* =========================
+   PROFILE DROPDOWN (APPLE STYLE)
+========================= */
+
+.profile-dropdown {
+  min-width: 180px;
+  padding: 8px;
+  border-radius: 14px;
+
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.65),
+    rgba(180, 185, 190, 0.35)
+  );
+
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+
+  border: 1px solid rgba(255, 255, 255, 0.45);
+
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.7) inset,
+    0 18px 40px rgba(0,0,0,0.22);
+}
+
+/* Radix animation states */
+.profile-dropdown[data-state="open"] {
+  animation: dropdown-in 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.profile-dropdown[data-state="closed"] {
+  animation: dropdown-out 120ms ease-in;
+}
+
+@keyframes dropdown-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes dropdown-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+}
+
+/* =========================
+   DROPDOWN ITEMS
+========================= */
+
+.dropdown-item {
+  padding: 10px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.dropdown-item:hover {
+  background: rgba(255,255,255,0.45);
+}
+
+.dropdown-item.danger {
+  color: #e53935;
+}
+
+.dropdown-separator {
+  height: 1px;
+  background: rgba(255,255,255,0.15);
+  margin: 6px 0;
+}
+
+/* =========================
+   SKELETONS (GLOBAL)
+========================= */
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.08),
+    rgba(255,255,255,0.18),
+    rgba(255,255,255,0.08)
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.2s infinite;
+}
+
+@keyframes shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
+/* =========================
+   PROFILE PAGE
+========================= */
+
+.profile-card {
+  padding: 20px;
+  border-radius: 16px;
+}
+
+.profile-row {
+  margin-bottom: 14px;
+}
+
+.skeleton-line {
+  height: 14px;
+  width: 220px;
+  border-radius: 6px;
+}
+
+.skeleton-line.short {
+  width: 140px;
+}
+
+
+.profile-btn {
+  isolation: isolate;
+}

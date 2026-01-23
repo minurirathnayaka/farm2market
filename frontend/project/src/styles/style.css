@@ -1,0 +1,41 @@
+@import url("./base.css");
+@import url("./layout.css");
+@import url("./components.css");
+@import url("./home.css");
+@import url("./auth.css");
+@import url("./pages.css");
+@import url("./dashboard.css");
+@import url("./profile.css");
+
+/* ================================
+   HEADER OVER HERO (LANDING ONLY)
+================================ */
+
+.header.header-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: transparent !important;
+  backdrop-filter: none !important;
+  z-index: 50;
+}
+
+/* readable nav pill */
+.header.header-overlay .nav-glass {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(14px);
+}
+
+/* white text on hero */
+.header.header-overlay .logo,
+.header.header-overlay .nav-link,
+.header.header-overlay .btn {
+  color: #fff;
+}
+
+/* keep buttons glassy */
+.header.header-overlay .btn {
+  background: rgba(255, 255, 255, 0.25);
+}
+

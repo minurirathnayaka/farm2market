@@ -1,0 +1,138 @@
+/* =================================
+   BUYER DASHBOARD – LIQUID GLASS
+================================= */
+
+.buyer-dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* ================= KPI CARDS ================= */
+
+.buyer-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 22px;
+}
+
+.buyer-stat-card {
+  padding: 28px;
+  border-radius: 22px;
+  position: relative;
+  overflow: hidden;
+}
+
+.buyer-stat-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at top left,
+    rgba(255, 255, 255, 0.25),
+    transparent 60%
+  );
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.buyer-stat-card h3 {
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: #38bdf8;
+  margin-bottom: 6px;
+}
+
+.buyer-stat-card p {
+  font-size: 14px;
+  opacity: 0.85;
+}
+
+/* ================= STOCK GRID ================= */
+
+.stock-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 26px;
+}
+
+/* ================= STOCK CARD ================= */
+
+.stock-card {
+  padding: 22px;
+  border-radius: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  position: relative;
+}
+
+.stock-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255,255,255,0.14),
+    rgba(255,255,255,0.02)
+  );
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* header */
+.stock-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.stock-card-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.stock-price {
+  font-weight: 800;
+  color: #22c55e;
+}
+
+/* meta */
+.stock-meta {
+  font-size: 14px;
+  opacity: 0.85;
+}
+
+.stock-meta p {
+  margin: 2px 0;
+}
+
+/* ================= ACTIONS ================= */
+
+.stock-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: auto;
+}
+
+.stock-actions .btn {
+  flex: 1;
+}
+
+/* ================= EMPTY ================= */
+
+.buyer-empty {
+  padding: 48px 0;
+  text-align: center;
+  opacity: 0.75;
+}
+
+/* ================= MOBILE ================= */
+
+@media (max-width: 640px) {
+  .buyer-stat-card h3 {
+    font-size: 2rem;
+  }
+}

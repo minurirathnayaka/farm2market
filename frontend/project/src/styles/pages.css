@@ -1,0 +1,220 @@
+/* =========================
+   GENERIC CONTENT SECTIONS
+========================= */
+
+.content-section {
+  margin-bottom: 60px;
+}
+
+.content-section h2 {
+  font-size: 32px;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: 20px;
+}
+
+.content-section p {
+  font-size: 16px;
+  line-height: 1.8;
+  color: var(--text-gray);
+}
+
+/* =========================
+   BENEFITS LIST
+========================= */
+
+.benefits-list {
+  padding: 0;
+}
+
+.benefits-list li {
+  font-size: 16px;
+  color: var(--text-gray);
+  margin-bottom: 16px;
+  padding-left: 32px;
+  position: relative;
+}
+
+.benefits-list li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: var(--primary-green);
+  font-weight: bold;
+  font-size: 20px;
+}
+
+/* =========================
+   CONTACT PAGE
+========================= */
+
+.contact-wrapper {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: start;
+}
+
+.contact-info {
+  padding-right: 40px;
+}
+
+.info-item {
+  margin-bottom: 40px;
+}
+
+.info-item h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: 12px;
+}
+
+.info-item p {
+  font-size: 16px;
+  color: var(--text-gray);
+  line-height: 1.8;
+}
+
+.info-item a {
+  color: var(--primary-green);
+  transition: color 0.3s;
+}
+
+.info-item a:hover {
+  color: var(--dark-green);
+}
+
+/* Contact form wrapper */
+.contact-form {
+  background-color: var(--bg-light);
+  padding: 40px;
+  border-radius: 12px;
+}
+
+/* =========================
+   PRIVACY POLICY
+========================= */
+
+.policy-content {
+  max-width: 800px;
+  line-height: 1.8;
+}
+
+.policy-content h2 {
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-top: 40px;
+  margin-bottom: 16px;
+}
+
+.policy-content p {
+  font-size: 16px;
+  color: var(--text-gray);
+  margin-bottom: 16px;
+}
+
+.policy-list {
+  padding: 0;
+  margin-bottom: 16px;
+}
+
+.policy-list li {
+  font-size: 16px;
+  color: var(--text-gray);
+  margin-bottom: 12px;
+  padding-left: 32px;
+  position: relative;
+}
+
+.policy-list li::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: var(--primary-green);
+  font-weight: bold;
+}
+
+.last-updated {
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid #E5E5E5;
+  color: var(--text-gray);
+  font-size: 14px;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 768px) {
+  .content-section h2 {
+    font-size: 24px;
+  }
+
+  .contact-wrapper {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+
+  .contact-info {
+    padding-right: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .content-section h2 {
+    font-size: 20px;
+  }
+
+  .contact-form {
+    padding: 24px;
+  }
+}
+.glass-page {
+  min-height: calc(100vh - 80px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+.glass-card {
+  width: 380px;
+  padding: 24px;
+  backdrop-filter: blur(16px);
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.25);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.glass-card h2 {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.glass-card input,
+.glass-card select {
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+}
+
+.glass-card button {
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+  background: #2e7d32;
+  color: white;
+  cursor: pointer;
+}
+
+.glass-card button:disabled {
+  opacity: 0.6;
+}

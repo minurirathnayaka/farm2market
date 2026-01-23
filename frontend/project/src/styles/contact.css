@@ -1,0 +1,121 @@
+/* =========================
+   CONTACT HERO
+========================= */
+
+.contact-hero {
+  position: relative;
+  min-height: 100vh;
+  padding-top: 96px;
+  padding-bottom: 520px; /* ⬆ MORE SPACE FOR OVERLAP */
+
+  background:
+    linear-gradient(
+      rgba(0, 0, 0, 0.28),
+      rgba(0, 0, 0, 0.28)
+    ),
+    url("https://images.pexels.com/photos/4094697/pexels-photo-4094697.jpeg")
+      center / cover no-repeat;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* overlay div kept for JSX */
+.contact-hero-overlay {
+  position: absolute;
+  inset: 0;
+}
+
+/* HERO TEXT */
+.contact-hero-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  color: #fff;
+  transform: translateY(-60px); /* 🔼 MOVE TEXT UP */
+}
+
+.contact-hero-content h1 {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.contact-hero-content p {
+  font-size: 18px;
+  opacity: 0.95;
+}
+
+/* =========================
+   FLOATING CONTENT
+========================= */
+
+.contact-content {
+  max-width: 1200px;
+  margin: -660px auto 120px; /* ⬆ BRING BOTH CARDS UP */
+  padding: 0 20px;
+}
+
+/* GRID */
+.contact-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+}
+
+/* GLASS BOXES */
+.contact-info,
+.contact-form {
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(18px);
+  border-radius: 22px;
+  padding: 32px;
+  box-shadow: 0 40px 90px rgba(0,0,0,0.22);
+}
+
+/* INFO */
+.info-item {
+  margin-bottom: 24px;
+}
+
+.info-item h3 {
+  margin-bottom: 6px;
+  font-size: 18px;
+}
+
+/* FORM */
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.contact-form input,
+.contact-form textarea {
+  width: 100%;
+  background: rgba(255,255,255,0.9);
+  border-radius: 12px;
+  border: none;
+  padding: 14px 16px;
+  font-size: 15px;
+}
+
+.contact-form input:focus,
+.contact-form textarea:focus {
+  outline: none;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .contact-grid {
+    grid-template-columns: 1fr;
+  }
+
+.contact-content {
+  max-width: 1200px;
+  margin: -440px auto 0; /* ⬅ remove bottom gap */
+  padding: 0 20px;
+}
+}
+
+

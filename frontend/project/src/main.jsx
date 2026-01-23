@@ -1,0 +1,14 @@
+import React from "react";
+import ReactDOM from "react-dom/client";
+import { RouterProvider } from "react-router-dom";
+import { Toaster } from "sonner";
+
+import router from "./app/router.jsx";
+import { AuthProvider } from "./state/authStore.jsx";
+
+ReactDOM.createRoot(document.getElementById("root")).render(
+  <AuthProvider>
+    <RouterProvider router={router} />
+    <Toaster richColors position="top-right" />
+  </AuthProvider>
+);

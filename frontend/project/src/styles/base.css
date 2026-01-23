@@ -1,0 +1,110 @@
+/* =========================
+   RESET
+========================= */
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* =========================
+   CSS VARIABLES
+========================= */
+
+:root {
+  --primary-green: #6B8E6F;
+  --dark-green: #5A7A5E;
+  --light-green: #8FAF92;
+
+  --text-dark: #2C2C2C;
+  --text-gray: #666666;
+
+  --bg-light: #F5F5F5;
+  --white: #FFFFFF;
+
+  --shadow: rgba(0, 0, 0, 0.1);
+}
+
+/* =========================
+   HTML / BODY
+========================= */
+
+html {
+  height: 100%;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  min-height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont,
+               'Segoe UI', Roboto, 'Helvetica Neue',
+               Arial, sans-serif;
+
+  line-height: 1.6;
+  color: var(--text-dark);
+  background-color: var(--white);
+
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* =========================
+   MEDIA DEFAULTS
+========================= */
+
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+/* =========================
+   FORM RESET
+========================= */
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+/* =========================
+   LINKS
+========================= */
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* =========================
+   LISTS
+========================= */
+
+ul,
+ol {
+  list-style: none;
+}
+
+/* =========================
+   ACCESSIBILITY
+========================= */
+
+:focus-visible {
+  outline: 2px solid var(--primary-green);
+  outline-offset: 2px;
+}

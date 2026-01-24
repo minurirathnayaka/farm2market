@@ -1,7 +1,11 @@
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useState } from "react";
 
-import "../styles/style.css";
+import "../styles/components/public-header.css";
+import "../styles/base.css";
+import "../styles/layout.css";
+import "../styles/components/liquid-glass.css";
+
 import LoginModal from "../components/modals/LoginModal";
 import SignupModal from "../components/modals/SignupModal";
 import { useAuth } from "../state/authStore";

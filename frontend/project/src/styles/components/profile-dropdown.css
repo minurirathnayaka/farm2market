@@ -1,0 +1,35 @@
+/* =================================
+   PROFILE DROPDOWN
+================================= */
+
+.profile-dropdown {
+  min-width: 160px;
+  padding: 6px;
+  border-radius: 12px;
+
+  background: rgba(255,255,255,0.9);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(0,0,0,0.12);
+}
+
+.dropdown-item {
+  padding: 10px 12px;
+  font-size: 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #222;
+}
+
+.dropdown-item:hover {
+  background: rgba(0,0,0,0.06);
+}
+
+.dropdown-item.danger {
+  color: #dc2626;
+}
+
+.dropdown-separator {
+  height: 1px;
+  margin: 6px 0;
+  background: rgba(0,0,0,0.1);
+}

@@ -1,0 +1,36 @@
+/* =================================
+   PUBLIC NAV
+================================= */
+
+.nav {
+  display: flex;
+  justify-content: center;
+}
+
+.nav-glass {
+  display: flex;
+  gap: 6px;
+  padding: 6px;
+  border-radius: 999px;
+
+  background: rgba(255,255,255,0.65);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(0,0,0,0.08);
+}
+
+.nav-link {
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 14px;
+  color: #333;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.nav-link:hover {
+  background: rgba(0,0,0,0.06);
+}
+
+.nav-link.active {
+  background: #2c2c2c;
+  color: #fff;
+}

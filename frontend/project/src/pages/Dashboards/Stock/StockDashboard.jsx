@@ -4,7 +4,7 @@ import { db } from "../../../js/firebase";
 import { useAuth } from "../../../state/authStore";
 import { useNavigate } from "react-router-dom";
 
-import "../../../styles/farmer-dashboard.css";
+import "../../../styles/stock-dashboard.css";
 
 export default function StockDashboard() {
   const { user } = useAuth();
@@ -17,12 +17,32 @@ export default function StockDashboard() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  if (!user) {
+    return (
+      <div className="dashboard-container stock-dashboard">
+        <p>You must be logged in to submit stock.</p>
+      </div>
+    );
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (loading) return;
+
     setError("");
 
-    if (!vegetable || !market || !quantity || !price) {
-      setError("All fields are required");
+    const qty = Number(quantity);
+    const pr = Number(price);
+
+    if (
+      !vegetable.trim() ||
+      !market.trim() ||
+      !Number.isFinite(qty) ||
+      !Number.isFinite(pr) ||
+      qty <= 0 ||
+      pr <= 0
+    ) {
+      setError("Please enter valid values for all fields.");
       return;
     }
 
@@ -30,26 +50,26 @@ export default function StockDashboard() {
       setLoading(true);
 
       await addDoc(collection(db, "stocks"), {
-        vegetable,
-        market,
-        quantity: Number(quantity),
-        price: Number(price),
+        vegetable: vegetable.trim(),
+        market: market.trim(),
+        quantity: qty,
+        price: pr,
         farmerId: user.uid,
         createdAt: serverTimestamp(),
       });
 
       navigate("/dashboard/farmer");
-    } catch (err) {
-      console.error(err);
-      setError("Failed to submit stock");
+    } catch {
+      setError("Failed to submit stock. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="dashboard-container farmer-dashboard">
-      <div className="farmer-header">
+    <div className="dashboard-container stock-dashboard">
+      {/* ================= HEADER ================= */}
+      <div className="stock-header">
         <div>
           <h1 className="dashboard-title">Submit Stock</h1>
           <p className="dashboard-subtitle">
@@ -65,7 +85,8 @@ export default function StockDashboard() {
         </button>
       </div>
 
-      <div className="farmer-table-card liquid-glass">
+      {/* ================= FORM ================= */}
+      <div className="stock-card liquid-glass">
         <form className="stock-form" onSubmit={handleSubmit}>
           <div className="form-row">
             <label>Vegetable</label>
@@ -110,7 +131,7 @@ export default function StockDashboard() {
           {error && <p className="form-error">{error}</p>}
 
           <button className="btn" type="submit" disabled={loading}>
-            {loading ? "Submitting..." : "Submit Stock"}
+            {loading ? "Submitting…" : "Submit Stock"}
           </button>
         </form>
       </div>

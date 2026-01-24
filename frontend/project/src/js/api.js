@@ -1,27 +1,61 @@
-let chart
+const API_BASE =
+  import.meta.env.VITE_API_BASE_URL ||
+  "http://18.139.192.254"; // fallback EC2 IP
 
-document.getElementById('predictBtn').addEventListener('click', loadPrediction)
+const DEFAULT_TIMEOUT = 10000; // 10s
+const DEFAULT_RETRIES = 2;
 
-async function loadPrediction() {
-  const veg = document.getElementById('vegSelect').value
-  const market = document.getElementById('marketSelect').value
+/**
+ * Core fetch wrapper with:
+ * - timeout
+ * - retries
+ * - safe JSON parsing
+ */
+async function request(path, options = {}, retries = DEFAULT_RETRIES) {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), DEFAULT_TIMEOUT);
 
-  const res = await fetch(`/predict?vegetable=${veg}&market=${market}`)
-  const data = await res.json()
+  try {
+    const res = await fetch(`${API_BASE}${path}`, {
+      ...options,
+      signal: controller.signal,
+      headers: {
+        "Content-Type": "application/json",
+        ...(options.headers || {}),
+      },
+    });
 
-  const ctx = document.getElementById('priceChart')
-
-  if (chart) chart.destroy()
-
-  chart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: data.labels || ['Day 1','Day 2','Day 3','Day 4','Day 5'],
-      datasets: [{
-        label: `${veg} price in ${market}`,
-        data: data.prices,
-        borderWidth: 2
-      }]
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`API ${res.status}: ${text}`);
     }
-  })
+
+    return await res.json();
+  } catch (err) {
+    if (retries > 0) {
+      return request(path, options, retries - 1);
+    }
+    throw err;
+  } finally {
+    clearTimeout(id);
+  }
+}
+
+/* =========================
+   API METHODS
+========================= */
+
+export function fetchModels() {
+  return request("/models");
+}
+
+export function fetchPrediction({ veg, market, start, end }) {
+  const params = new URLSearchParams({
+    veg,
+    market,
+    start,
+    end,
+  });
+
+  return request(`/predict?${params.toString()}`);
 }

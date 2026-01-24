@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
   Chart as ChartJS,
@@ -11,10 +11,14 @@ import {
   Legend,
 } from "chart.js";
 import { Line } from "react-chartjs-2";
-import "../../styles/selectors.css";
 
-import "../../styles/layout.css";
+/* styles – will be refactored after */
+import "../../styles/pages/prediction-dashboard.css";
 
+
+/* =========================
+   Chart.js setup
+========================= */
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -25,18 +29,21 @@ ChartJS.register(
   Legend
 );
 
-const MODELS_URL = "https://farm2market.org/models";
-const PREDICT_URL = "https://farm2market.org/predict";
+/* =========================
+   API config
+========================= */
+const API_BASE =
+  import.meta.env.VITE_API_BASE_URL || "https://farm2market.org";
 
+/* =========================
+   UX helpers
+========================= */
 const STATUS_MESSAGES = [
-  "Establishing secure edge connection",
-  "Request routed through CDN",
-  "Reverse proxy handshake successful",
-  "Model artifact located on compute node",
-  "Initializing forecasting pipeline",
-  "Evaluating seasonal components",
-  "Generating confidence intervals",
-  "Finalizing response payload",
+  "Establishing secure connection",
+  "Routing request",
+  "Loading model",
+  "Running forecast",
+  "Finalizing results",
 ];
 
 const todayISO = () => new Date().toISOString().slice(0, 10);
@@ -46,8 +53,13 @@ const addDaysISO = (d) => {
   return x.toISOString().slice(0, 10);
 };
 
+/* =========================
+   Component
+========================= */
 export default function PredictionDashboard() {
   const [searchParams] = useSearchParams();
+  const abortRef = useRef(null);
+  const statusTimerRef = useRef(null);
 
   const [models, setModels] = useState([]);
   const [veg, setVeg] = useState(searchParams.get("veg") || "");
@@ -62,12 +74,29 @@ export default function PredictionDashboard() {
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
 
+  /* =========================
+     Load models (once)
+  ========================= */
   useEffect(() => {
-    fetch(MODELS_URL)
-      .then((r) => r.json())
-      .then((d) => setModels(d.models || []));
+    const controller = new AbortController();
+    abortRef.current = controller;
+
+    fetch(`${API_BASE}/models`, { signal: controller.signal })
+      .then((r) => {
+        if (!r.ok) throw new Error("Model registry unavailable");
+        return r.json();
+      })
+      .then((d) => setModels(d.models || []))
+      .catch(() => {
+        setError("Unable to load prediction models.");
+      });
+
+    return () => controller.abort();
   }, []);
 
+  /* =========================
+     Parse models
+  ========================= */
   const parsed = useMemo(() => {
     return models.map((m) => {
       const parts = m.split("_");
@@ -77,64 +106,67 @@ export default function PredictionDashboard() {
     });
   }, [models]);
 
-  const vegetables = [...new Set(parsed.map((p) => p.veg))];
-  const markets = [...new Set(parsed.map((p) => p.market))];
+  const vegetables = useMemo(
+    () => [...new Set(parsed.map((p) => p.veg))],
+    [parsed]
+  );
+  const markets = useMemo(
+    () => [...new Set(parsed.map((p) => p.market))],
+    [parsed]
+  );
 
-  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-
-  const fetchWithRetry = async (url, attempts = 2) => {
-    for (let i = 0; i < attempts; i++) {
-      try {
-        const res = await fetch(url);
-        if (!res.ok) throw new Error();
-        return await res.json();
-      } catch {
-        if (i === attempts - 1) throw new Error();
-        await sleep(800);
-      }
-    }
-  };
-
+  /* =========================
+     Prediction runner
+  ========================= */
   const runPrediction = async () => {
-    if (!veg || !market) return;
+    if (!veg || !market || loading) return;
 
     setForecast(null);
     setError("");
     setLoading(true);
     setProgress(0);
 
-    const totalTime = 4000;
-    const stepTime = totalTime / STATUS_MESSAGES.length;
-    let idx = 0;
+    const controller = new AbortController();
+    abortRef.current = controller;
 
-    const statusTimer = setInterval(() => {
-      setStatus(STATUS_MESSAGES[idx]);
-      setProgress((p) =>
-        Math.min(p + 100 / STATUS_MESSAGES.length, 96)
-      );
+    let idx = 0;
+    statusTimerRef.current = setInterval(() => {
+      setStatus(STATUS_MESSAGES[idx] || "");
+      setProgress((p) => Math.min(p + 100 / STATUS_MESSAGES.length, 95));
       idx++;
-      if (idx >= STATUS_MESSAGES.length) clearInterval(statusTimer);
-    }, stepTime);
+    }, 700);
 
     try {
-      const data = await fetchWithRetry(
-        `${PREDICT_URL}?veg=${veg}&market=${market}&start=${startDate}&end=${endDate}`,
-        2
+      const params = new URLSearchParams({
+        veg,
+        market,
+        start: startDate,
+        end: endDate,
+      });
+
+      const res = await fetch(
+        `${API_BASE}/predict?${params.toString()}`,
+        { signal: controller.signal }
       );
 
-      await sleep(totalTime);
+      if (!res.ok) throw new Error();
+
+      const data = await res.json();
       setForecast(data);
     } catch {
       setError("Prediction service is temporarily unavailable.");
     } finally {
+      clearInterval(statusTimerRef.current);
       setLoading(false);
       setProgress(0);
-      clearInterval(statusTimer);
     }
   };
 
+  /* =========================
+     Chart data
+  ========================= */
   const chartData = useMemo(() => {
-    if (!forecast) return null;
+    if (!forecast?.predictions) return null;
 
     return {
       labels: forecast.predictions.map((p) =>
@@ -147,10 +179,10 @@ export default function PredictionDashboard() {
           borderColor: "#22c55e",
           borderWidth: 3,
           tension: 0.35,
-          pointRadius: 4,
+          pointRadius: 3,
         },
         {
-          label: "Confidence Range",
+          label: "Upper Bound",
           data: forecast.predictions.map((p) => p.yhat_upper),
           borderWidth: 0,
           pointRadius: 0,
@@ -169,8 +201,22 @@ export default function PredictionDashboard() {
     };
   }, [forecast]);
 
+  /* =========================
+     Cleanup on unmount
+  ========================= */
+  useEffect(() => {
+    return () => {
+      abortRef.current?.abort();
+      clearInterval(statusTimerRef.current);
+    };
+  }, []);
+
+  /* =========================
+     Render
+  ========================= */
   return (
-    <div className="dashboard-container">
+    <div className="dashboard-container prediction-dashboard">
+
       <h1 className="dashboard-title">Market Predictions</h1>
       <p className="dashboard-subtitle">AI-powered price forecasts</p>
 
@@ -187,26 +233,15 @@ export default function PredictionDashboard() {
         <select value={market} onChange={(e) => setMarket(e.target.value)}>
           <option value="">Select market</option>
           {markets.map((m) => (
-            <option key={m} value={m}>
-              {m}
-            </option>
+            <option key={m} value={m}>{m}</option>
           ))}
         </select>
 
-        <input
-          type="date"
-          value={startDate}
-          onChange={(e) => setStartDate(e.target.value)}
-        />
-
-        <input
-          type="date"
-          value={endDate}
-          onChange={(e) => setEndDate(e.target.value)}
-        />
+        <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+        <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
 
         <button className="predict-btn" onClick={runPrediction}>
-          Filter
+          Run forecast
         </button>
       </div>
 
@@ -222,10 +257,7 @@ export default function PredictionDashboard() {
             <div className="spinner" />
             <div className="loading-status">{status}</div>
             <div className="progress-bar">
-              <div
-                className="progress-fill"
-                style={{ width: `${progress}%` }}
-              />
+              <div className="progress-fill" style={{ width: `${progress}%` }} />
             </div>
           </div>
         )}
@@ -233,9 +265,7 @@ export default function PredictionDashboard() {
         {error && <div className="error-box">{error}</div>}
 
         {chartData && !loading && !error && (
-          <div className="chart-wrapper">
-            <Line data={chartData} options={{ responsive: true }} />
-          </div>
+          <Line data={chartData} options={{ responsive: true }} />
         )}
       </div>
     </div>

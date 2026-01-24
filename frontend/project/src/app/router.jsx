@@ -1,37 +1,90 @@
 import { createBrowserRouter } from "react-router-dom";
+import { lazy, Suspense } from "react";
 
-/* layouts */
+/* ======================================================
+   Layouts
+   These define the chrome of the app
+====================================================== */
 import PublicLayout from "../layouts/PublicLayout";
 import DashboardLayout from "../layouts/DashboardLayout";
 
-/* public pages */
+/* ======================================================
+   Guards
+   AuthGuard -> logged in
+   RoleGuard -> role-based access
+====================================================== */
+import AuthGuard from "../js/auth-guard.jsx";
+import RoleGuard from "../js/role-guard.jsx";
+
+/* ======================================================
+   Public pages (eager-loaded)
+   These are light and needed immediately
+====================================================== */
 import Landing from "../pages/Landing/Landing";
 import About from "../pages/About/About";
 import Contact from "../pages/Contact/Contact";
 import Profile from "../pages/Profile/Profile";
 
-/* dashboards */
-import GuestDashboard from "../pages/Dashboards/GuestDashboard";
-import BuyerDashboard from "../pages/Dashboards/BuyerDashboard";
-import FarmerDashboard from "../pages/Dashboards/Farmer/FarmerDashboard";
-import TransporterDashboard from "../pages/Dashboards/Transporter/TransporterDashboard";
+/* ======================================================
+   Dashboard pages (lazy-loaded)
+   Heavy pages → load only when needed
+====================================================== */
+const GuestDashboard = lazy(() =>
+  import("../pages/Dashboards/GuestDashboard")
+);
+const BuyerDashboard = lazy(() =>
+  import("../pages/Dashboards/BuyerDashboard")
+);
+const FarmerDashboard = lazy(() =>
+  import("../pages/Dashboards/Farmer/FarmerDashboard")
+);
+const TransporterDashboard = lazy(() =>
+  import("../pages/Dashboards/Transporter/TransporterDashboard")
+);
+const PredictionDashboard = lazy(() =>
+  import("../pages/Dashboards/PredictionDashboard")
+);
+const StockDashboard = lazy(() =>
+  import("../pages/Dashboards/Stock/StockDashboard")
+);
 
-/* shared dashboard pages */
-import PredictionDashboard from "../pages/Dashboards/PredictionDashboard";
-import StockDashboard from "../pages/Dashboards/Stock/StockDashboard";
+/* ======================================================
+   Shared fallbacks
+====================================================== */
+function PageLoader() {
+  return (
+    <div style={{ padding: "2rem", textAlign: "center" }}>
+      Loading...
+    </div>
+  );
+}
 
-/* guards */
-import AuthGuard from "../js/auth-guard.jsx";
-import RoleGuard from "../js/role-guard.jsx";
+function RouteError() {
+  return (
+    <div style={{ padding: "2rem", textAlign: "center" }}>
+      <h2>Page unavailable</h2>
+      <p>Please refresh or try again later.</p>
+    </div>
+  );
+}
 
+/* ======================================================
+   Router definition
+====================================================== */
 const router = createBrowserRouter([
+  /* =========================
+     Public routes
+  ========================= */
   {
     path: "/",
     element: <PublicLayout />,
+    errorElement: <RouteError />,
     children: [
       { index: true, element: <Landing /> },
       { path: "about", element: <About /> },
       { path: "contact", element: <Contact /> },
+
+      // Profile is public-layout but auth-protected
       {
         path: "profile",
         element: (
@@ -43,77 +96,103 @@ const router = createBrowserRouter([
     ],
   },
 
-  /* DASHBOARDS */
+  /* =========================
+     Dashboard routes
+     Everything here lives under /dashboard
+  ========================= */
   {
     path: "/dashboard",
     element: <DashboardLayout />,
+    errorElement: <RouteError />,
     children: [
-      /* guest dashboard (no auth) */
+      // Guest dashboard (no auth, read-only style)
       {
         path: "guest",
-        element: <GuestDashboard />,
+        element: (
+          <Suspense fallback={<PageLoader />}>
+            <GuestDashboard />
+          </Suspense>
+        ),
       },
 
-      /* buyer dashboard */
+      // Buyer dashboard
       {
         path: "buyer",
         element: (
           <AuthGuard>
             <RoleGuard allow={["buyer"]}>
-              <BuyerDashboard />
+              <Suspense fallback={<PageLoader />}>
+                <BuyerDashboard />
+              </Suspense>
             </RoleGuard>
           </AuthGuard>
         ),
       },
 
-      /* farmer dashboard */
+      // Farmer dashboard
       {
         path: "farmer",
         element: (
           <AuthGuard>
             <RoleGuard allow={["farmer"]}>
-              <FarmerDashboard />
+              <Suspense fallback={<PageLoader />}>
+                <FarmerDashboard />
+              </Suspense>
             </RoleGuard>
           </AuthGuard>
         ),
       },
 
-      /* transporter dashboard */
+      // Transporter dashboard
       {
         path: "transporter",
         element: (
           <AuthGuard>
             <RoleGuard allow={["transporter"]}>
-              <TransporterDashboard />
+              <Suspense fallback={<PageLoader />}>
+                <TransporterDashboard />
+              </Suspense>
             </RoleGuard>
           </AuthGuard>
         ),
       },
 
-      /* shared prediction page */
+      // Shared predictions page (buyer + farmer)
       {
         path: "predictions",
         element: (
           <AuthGuard>
             <RoleGuard allow={["buyer", "farmer"]}>
-              <PredictionDashboard />
+              <Suspense fallback={<PageLoader />}>
+                <PredictionDashboard />
+              </Suspense>
             </RoleGuard>
           </AuthGuard>
         ),
       },
 
-      /* farmer-only stock */
+      // Farmer-only stock management
       {
         path: "stock",
         element: (
           <AuthGuard>
             <RoleGuard allow={["farmer"]}>
-              <StockDashboard />
+              <Suspense fallback={<PageLoader />}>
+                <StockDashboard />
+              </Suspense>
             </RoleGuard>
           </AuthGuard>
         ),
       },
     ],
+  },
+
+  /* =========================
+     Catch-all 404
+  ========================= */
+  {
+    path: "*",
+    element: <RouteError />,
   },
 ]);
 

@@ -1,5 +1,5 @@
 /* =================================
-   FARMER DASHBOARD – LIQUID GLASS
+   FARMER DASHBOARD – PAGE SCOPED
 ================================= */
 
 .farmer-dashboard {
@@ -8,25 +8,19 @@
   gap: 36px;
 }
 
-/* ================= LIQUID BASE ================= */
+/* ================= HEADER ================= */
 
-.liquid-glass {
-  background:
-    linear-gradient(
-      145deg,
-      rgba(255,255,255,0.14),
-      rgba(255,255,255,0.04)
-    );
-  backdrop-filter: blur(22px) saturate(160%);
-  -webkit-backdrop-filter: blur(22px) saturate(160%);
-  border-radius: 22px;
+.farmer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
 
-  border: 1px solid rgba(255,255,255,0.18);
-
-  box-shadow:
-    0 30px 60px rgba(0,0,0,0.45),
-    inset 0 1px 1px rgba(255,255,255,0.45),
-    inset 0 -1px 1px rgba(255,255,255,0.08);
+.farmer-back-btn {
+  padding: 10px 16px;
+  font-size: 14px;
+  white-space: nowrap;
 }
 
 /* ================= KPI CARDS ================= */
@@ -43,7 +37,6 @@
   overflow: hidden;
 }
 
-/* liquid highlight */
 .farmer-stat-card::before {
   content: "";
   position: absolute;
@@ -69,14 +62,6 @@
   opacity: 0.85;
 }
 
-/* hover flow */
-.farmer-stat-card:hover {
-  transform: translateY(-3px);
-  box-shadow:
-    0 40px 80px rgba(0,0,0,0.55),
-    inset 0 1px 1px rgba(255,255,255,0.55);
-}
-
 /* ================= TABLE CARD ================= */
 
 .farmer-table-card {
@@ -97,9 +82,15 @@
 
 /* ================= STOCK TABLE ================= */
 
+.farmer-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
 .farmer-stock-table {
   width: 100%;
   border-collapse: collapse;
+  min-width: 520px;
 }
 
 .farmer-stock-table th {
@@ -120,12 +111,11 @@
   border-bottom: none;
 }
 
-/* row hover = liquid shift */
 .farmer-stock-table tr:hover td {
   background: rgba(255,255,255,0.04);
 }
 
-/* ================= EMPTY STATE ================= */
+/* ================= EMPTY ================= */
 
 .farmer-empty {
   padding: 48px 0;
@@ -146,51 +136,3 @@
     font-size: 2.2rem;
   }
 }
-
-/* ================= HEADER ================= */
-
-.farmer-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 16px;
-}
-
-.farmer-back-btn {
-  padding: 10px 16px;
-  font-size: 14px;
-  white-space: nowrap;
-}
-
-/* ================= STOCK FORM ================= */
-
-.stock-form {
-  max-width: 520px;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-
-.form-row {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.form-row label {
-  font-size: 14px;
-  opacity: 0.85;
-}
-
-.form-row input {
-  padding: 12px 14px;
-  border-radius: 10px;
-  border: none;
-  outline: none;
-}
-
-.form-error {
-  color: #ef4444;
-  font-size: 14px;
-}
-

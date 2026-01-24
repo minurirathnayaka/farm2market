@@ -1,0 +1,97 @@
+/* =================================
+   GUEST DASHBOARD – READ ONLY
+================================= */
+
+.guest-dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+}
+
+/* ================= KPI ================= */
+
+.guest-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 22px;
+}
+
+.guest-stat-card {
+  padding: 28px;
+  border-radius: 22px;
+  position: relative;
+  overflow: hidden;
+}
+
+.guest-stat-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at top left,
+    rgba(255,255,255,0.22),
+    transparent 60%
+  );
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.guest-stat-card h3 {
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: #38bdf8;
+  margin-bottom: 6px;
+}
+
+.guest-stat-card p {
+  font-size: 14px;
+  opacity: 0.85;
+}
+
+/* ================= TABLE ================= */
+
+.guest-table-card {
+  padding: 32px;
+}
+
+.guest-table-card h2 {
+  margin-bottom: 18px;
+  font-size: 1.4rem;
+}
+
+.guest-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.guest-stock-table {
+  width: 100%;
+  min-width: 520px;
+  border-collapse: collapse;
+}
+
+.guest-stock-table th {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.55);
+  padding-bottom: 14px;
+}
+
+.guest-stock-table td {
+  padding: 16px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  font-size: 15px;
+}
+
+.guest-stock-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* ================= EMPTY ================= */
+
+.guest-empty {
+  padding: 36px 0;
+  text-align: center;
+  opacity: 0.75;
+}

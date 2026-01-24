@@ -3,12 +3,10 @@ import { collection, onSnapshot } from "firebase/firestore";
 import { db } from "../../js/firebase";
 import { useNavigate } from "react-router-dom";
 
-import "../../styles/layout.css";
+/* page-scoped styles only */
 import "../../styles/buyer-dashboard.css";
-import "../../styles/loginsignup.css";
 
 /* ================= IMAGE HELPER ================= */
-
 const getVegImage = (veg) => {
   if (!veg) {
     return "https://source.unsplash.com/600x400/?vegetable,market";
@@ -24,11 +22,13 @@ export default function BuyerDashboard() {
 
   const [stocks, setStocks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [selectedStock, setSelectedStock] = useState(null);
 
   /* ================= REALTIME STOCKS ================= */
-
   useEffect(() => {
+    setLoading(true);
+
     const unsub = onSnapshot(
       collection(db, "stocks"),
       (snap) => {
@@ -39,7 +39,10 @@ export default function BuyerDashboard() {
         setStocks(data);
         setLoading(false);
       },
-      () => setLoading(false)
+      () => {
+        setError("Unable to load stock listings.");
+        setLoading(false);
+      }
     );
 
     return () => unsub();
@@ -59,12 +62,12 @@ export default function BuyerDashboard() {
   return (
     <div className="dashboard-container buyer-dashboard">
       {/* ================= HEADER ================= */}
-      <div>
+      <header>
         <h1 className="dashboard-title">Market Overview</h1>
         <p className="dashboard-subtitle">
           Live supply and pricing information
         </p>
-      </div>
+      </header>
 
       {/* ================= KPI CARDS ================= */}
       <div className="buyer-stats">
@@ -86,11 +89,18 @@ export default function BuyerDashboard() {
 
       {/* ================= STOCK CARDS ================= */}
       <div className="stock-grid">
-        {loading ? (
-          <p>Loading...</p>
-        ) : stocks.length === 0 ? (
+        {loading && <p>Loading listings…</p>}
+
+        {!loading && error && (
+          <p className="buyer-empty">{error}</p>
+        )}
+
+        {!loading && !error && stocks.length === 0 && (
           <p className="buyer-empty">No stock available</p>
-        ) : (
+        )}
+
+        {!loading &&
+          !error &&
           stocks.map((s) => (
             <div key={s.id} className="stock-card liquid-glass">
               {/* IMAGE */}
@@ -139,43 +149,40 @@ export default function BuyerDashboard() {
                 </div>
               </div>
             </div>
-          ))
-        )}
+          ))}
       </div>
 
       {/* ================= CONTACT MODAL ================= */}
       {selectedStock && (
         <div
-          className="auth-overlay show"
+          className="buyer-modal-overlay"
           onClick={() => setSelectedStock(null)}
         >
           <div
-            className="login-container"
+            className="buyer-modal"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="login-card">
-              <h2>Farmer Contact</h2>
+            <h2>Farmer Contact</h2>
 
-              <p>
-                <strong>Vegetable:</strong>{" "}
-                {selectedStock.vegetable}
-              </p>
-              <p>
-                <strong>Market:</strong>{" "}
-                {selectedStock.market}
-              </p>
-              <p>
-                <strong>Phone:</strong>{" "}
-                {selectedStock.phone || "Not available"}
-              </p>
+            <p>
+              <strong>Vegetable:</strong>{" "}
+              {selectedStock.vegetable}
+            </p>
+            <p>
+              <strong>Market:</strong>{" "}
+              {selectedStock.market}
+            </p>
+            <p>
+              <strong>Phone:</strong>{" "}
+              {selectedStock.phone || "Not available"}
+            </p>
 
-              <button
-                className="btn"
-                onClick={() => setSelectedStock(null)}
-              >
-                Close
-              </button>
-            </div>
+            <button
+              className="btn"
+              onClick={() => setSelectedStock(null)}
+            >
+              Close
+            </button>
           </div>
         </div>
       )}

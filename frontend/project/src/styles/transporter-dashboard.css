@@ -1,32 +1,108 @@
 /* =================================
-   TRANSPORTER DASHBOARD
+   TRANSPORTER DASHBOARD – PAGE SCOPED
 ================================= */
 
 .transporter-dashboard {
   display: flex;
   flex-direction: column;
   gap: 36px;
-  color: rgba(255,255,255,0.9);
 }
 
-/* ================= PLACEHOLDER ================= */
+/* ================= HEADER ================= */
 
-.transporter-empty {
-  padding: 80px 40px;
-  border-radius: 24px;
-  text-align: center;
+.transporter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
 }
 
-.transporter-empty h2 {
-  font-size: 1.8rem;
-  font-weight: 700;
-  margin-bottom: 10px;
+/* ================= KPI PREVIEW ================= */
+
+.transporter-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 22px;
+}
+
+.transporter-stat-card {
+  padding: 28px;
+  border-radius: 22px;
+  position: relative;
+  overflow: hidden;
+}
+
+.transporter-stat-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at top left,
+    rgba(255,255,255,0.22),
+    transparent 60%
+  );
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.transporter-stat-card h3 {
+  font-size: 2.4rem;
+  font-weight: 800;
   color: #38bdf8;
+  margin-bottom: 6px;
 }
 
-.transporter-empty p {
+.transporter-stat-card p {
+  font-size: 14px;
+  opacity: 0.85;
+}
+
+/* ================= MAIN CARD ================= */
+
+.transporter-main {
+  padding: 36px;
+  max-width: 820px;
+}
+
+.transporter-main h2 {
+  font-size: 1.6rem;
+  margin-bottom: 14px;
+}
+
+.transporter-description {
   font-size: 15px;
-  opacity: 0.8;
-  max-width: 420px;
-  margin: 0 auto;
+  opacity: 0.9;
+  margin-bottom: 22px;
+}
+
+/* ================= ROADMAP ================= */
+
+.transporter-roadmap {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 22px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.transporter-roadmap li {
+  font-size: 15px;
+  opacity: 0.85;
+}
+
+/* ================= NOTE ================= */
+
+.transporter-note {
+  font-size: 14px;
+  opacity: 0.65;
+  border-top: 1px solid rgba(255,255,255,0.15);
+  padding-top: 16px;
+}
+
+/* ================= MOBILE ================= */
+
+@media (max-width: 640px) {
+  .transporter-main {
+    padding: 28px;
+  }
 }

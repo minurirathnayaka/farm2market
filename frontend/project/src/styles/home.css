@@ -11,6 +11,7 @@
 /* Remove layout padding effect on home */
 body { padding-top: 0; }
 
+
 /* =========================
    HERO SECTION (UNCHANGED STYLE)
 ========================= */
@@ -18,7 +19,7 @@ body { padding-top: 0; }
 .hero {
   position: relative;
   min-height: 80vh;
- 
+  padding-top: 96px;
 
   display: flex;
   align-items: center;

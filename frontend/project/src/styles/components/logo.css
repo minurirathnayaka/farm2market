@@ -1,0 +1,14 @@
+/* =================================
+   LOGO
+================================= */
+
+.logo {
+  font-weight: 800;
+  font-size: 1.2rem;
+  letter-spacing: -0.02em;
+  text-decoration: none;
+}
+
+.logo-text {
+  color: #2c2c2c;
+}

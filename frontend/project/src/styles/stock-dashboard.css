@@ -1,0 +1,56 @@
+/* =================================
+   STOCK SUBMISSION – PAGE SCOPED
+================================= */
+
+.stock-dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+}
+
+/* ================= HEADER ================= */
+
+.stock-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+/* ================= CARD ================= */
+
+.stock-card {
+  padding: 32px;
+  max-width: 520px;
+}
+
+/* ================= FORM ================= */
+
+.stock-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-row label {
+  font-size: 14px;
+  opacity: 0.85;
+}
+
+.form-row input {
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: none;
+  outline: none;
+}
+
+.form-error {
+  color: #ef4444;
+  font-size: 14px;
+}

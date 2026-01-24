@@ -1,0 +1,35 @@
+/* =================================
+   AVATAR
+================================= */
+
+.avatar-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #2c2c2c;
+  color: #fff;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+/* Loading skeleton */
+.avatar-circle.skeleton {
+  background: linear-gradient(
+    90deg,
+    #e5e5e5 25%,
+    #f0f0f0 37%,
+    #e5e5e5 63%
+  );
+  background-size: 400% 100%;
+  animation: skeleton 1.4s ease infinite;
+}
+
+@keyframes skeleton {
+  0% { background-position: 100% 0; }
+  100% { background-position: 0 0; }
+}

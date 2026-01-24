@@ -1,4 +1,8 @@
+import "../../styles/components/avatar.css";
+
 export default function Avatar({ name, loading }) {
+  
+
   if (loading) {
     return <div className="avatar-circle skeleton" />;
   }

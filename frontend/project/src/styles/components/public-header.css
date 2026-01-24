@@ -1,0 +1,68 @@
+/* =================================
+   PUBLIC HEADER – REAL HEADER
+   Used by PublicLayout.jsx
+================================= */
+
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+}
+/* Overlay mode (landing pages) */
+.header.header-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+
+  background: transparent;
+  backdrop-filter: none;
+  border-bottom: none;
+}
+
+/* Overlay variant for landing pages */
+.header-overlay {
+  background: transparent;
+  border-bottom: none;
+}
+
+/* ================= LAYOUT ================= */
+
+.header-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 14px 20px;
+
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+}
+
+/* ================= ACTIONS ================= */
+
+.header-buttons {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Profile trigger button */
+.profile-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+/* ================= MOBILE ================= */
+
+@media (max-width: 640px) {
+  .header-inner {
+    padding: 12px 16px;
+  }
+}

@@ -1,4 +1,5 @@
 import { NavLink } from "react-router-dom";
+import "../../styles/components/public-nav.css";
 
 export default function PublicNav() {
   return (

@@ -1,4 +1,5 @@
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
+import "../../styles/components/profile-dropdown.css";
 
 export default function ProfileDropdown({
   trigger,

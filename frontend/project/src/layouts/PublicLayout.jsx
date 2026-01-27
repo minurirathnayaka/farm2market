@@ -1,5 +1,5 @@
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import "../styles/components/public-header.css";
 import "../styles/base.css";
@@ -17,12 +17,29 @@ import ProfileDropdown from "../components/ui/ProfileDropdown";
 
 export default function PublicLayout() {
   const [authModal, setAuthModal] = useState(null);
-  const { user, loading, logout } = useAuth();
+  const {
+    user,
+    loading,
+    logout,
+    justLoggedOut,
+    clearJustLoggedOut,
+  } = useAuth();
+
   const navigate = useNavigate();
   const location = useLocation();
 
-  const overlayHeaderPages = ["/", "/about", "/contact"];
+  // Pages that use transparent + glass header
+  const overlayHeaderPages = ["/", "/about", "/contact", "/profile"];
   const useOverlayHeader = overlayHeaderPages.includes(location.pathname);
+
+  // 🔹 NEW: react to logout signal
+  useEffect(() => {
+    if (justLoggedOut) {
+      setAuthModal("login");
+      navigate("/", { replace: true });
+      clearJustLoggedOut();
+    }
+  }, [justLoggedOut, navigate, clearJustLoggedOut]);
 
   return (
     <>

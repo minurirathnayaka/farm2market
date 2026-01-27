@@ -49,6 +49,38 @@
   opacity: 0.85;
 }
 
+/* ================= PRICE CHART ================= */
+
+.price-chart {
+  padding: 20px;
+  border-radius: 22px;
+}
+
+.price-chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.price-chart-controls {
+  display: flex;
+  gap: 10px;
+}
+
+.price-chart select {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
+  padding: 8px 12px;
+  color: #fff;
+}
+
+.price-chart-canvas {
+  height: 180px;
+}
+
 /* ================= STOCK GRID ================= */
 
 .stock-grid {
@@ -62,9 +94,6 @@
 .stock-card {
   padding: 22px;
   border-radius: 22px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
   position: relative;
 }
 
@@ -81,36 +110,6 @@
   pointer-events: none;
 }
 
-/* ================= IMAGE ================= */
-
-.stock-image {
-  width: 100%;
-  height: 160px;
-  border-radius: 14px;
-  overflow: hidden;
-}
-
-.stock-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-/* ================= CARD CONTENT ================= */
-
-.stock-card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.stock-card-header h3 {
-  margin: 0;
-  font-size: 1.2rem;
-  font-weight: 700;
-}
-
 .stock-price {
   font-weight: 800;
   color: #22c55e;
@@ -121,58 +120,12 @@
   opacity: 0.85;
 }
 
-.stock-meta p {
-  margin: 2px 0;
-}
-
-/* ================= ACTIONS ================= */
-
-.stock-actions {
-  display: flex;
-  gap: 12px;
-  margin-top: auto;
-}
-
-.stock-actions .btn {
-  flex: 1;
-}
-
 /* ================= EMPTY ================= */
 
 .buyer-empty {
-  padding: 48px 0;
+  padding: 24px 0;
   text-align: center;
   opacity: 0.75;
-}
-
-/* ================= MODAL ================= */
-
-.buyer-modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.55);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 50;
-}
-
-.buyer-modal {
-  background: #0b0f0e;
-  border-radius: 18px;
-  padding: 28px;
-  width: 100%;
-  max-width: 420px;
-  color: #fff;
-}
-
-.buyer-modal h2 {
-  margin-top: 0;
-  margin-bottom: 16px;
-}
-
-.buyer-modal p {
-  margin: 6px 0;
 }
 
 /* ================= MOBILE ================= */
@@ -180,5 +133,10 @@
 @media (max-width: 640px) {
   .buyer-stat-card h3 {
     font-size: 2rem;
+  }
+
+  .price-chart-header {
+    flex-direction: column;
+    align-items: stretch;
   }
 }

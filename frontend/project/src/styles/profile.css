@@ -1,49 +1,90 @@
 /* =========================
-   PROFILE PAGE WRAPPER
+   PROFILE HERO BACKGROUND
 ========================= */
 
 .profile-hero {
   min-height: 100vh;
+  padding: 140px 20px;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
+  gap: 40px;
+
+  background:
+    linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.6)),
+    url("https://images.pexels.com/photos/4094697/pexels-photo-4094697.jpeg")
+      center / cover no-repeat;
 }
 
 /* =========================
-   PROFILE GLASS CARD
+   INTRO
+========================= */
+
+.profile-intro {
+  text-align: center;
+  color: #fff;
+}
+
+.profile-intro span {
+  font-size: 12px;
+  letter-spacing: 0.3em;
+  opacity: 0.7;
+}
+
+.profile-intro h1 {
+  font-size: 36px;
+  margin-top: 8px;
+}
+
+/* =========================
+   GLASS CARD
 ========================= */
 
 .profile-glass-card {
   width: 100%;
-  max-width: 720px;
-  padding: 40px 44px;
-  border-radius: 28px;
+  max-width: 760px;
+  padding: 44px;
+  border-radius: 30px;
 
-  background: linear-gradient(
-    180deg,
-    rgba(255,255,255,0.75),
-    rgba(200,205,210,0.35)
-  );
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,0.85),
+      rgba(220,225,230,0.35)
+    );
 
-  backdrop-filter: blur(28px) saturate(180%);
-  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  backdrop-filter: blur(32px) saturate(180%);
+  -webkit-backdrop-filter: blur(32px) saturate(180%);
 
-  border: 1px solid rgba(255,255,255,0.55);
+  border: 1px solid rgba(255,255,255,0.5);
 
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.9),
-    0 40px 90px rgba(0,0,0,0.25);
+    0 40px 100px rgba(0,0,0,0.35);
+
+  animation: floatIn 0.7s cubic-bezier(.22,1,.36,1);
+}
+
+@keyframes floatIn {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 /* =========================
-   PROFILE HEADER
+   HEADER
 ========================= */
 
 .profile-header {
   display: flex;
   align-items: center;
   gap: 20px;
-  margin-bottom: 26px;
+  margin-bottom: 24px;
 }
 
 .profile-avatar {
@@ -60,70 +101,143 @@
   justify-content: center;
 
   box-shadow:
-    0 0 0 4px rgba(46,125,50,0.18),
-    0 10px 24px rgba(0,0,0,0.25);
+    0 0 0 4px rgba(46,125,50,0.25),
+    0 12px 26px rgba(0,0,0,0.35);
 }
 
 .profile-email {
   font-size: 14px;
-  opacity: 0.7;
+  opacity: 0.65;
 }
 
 /* =========================
-   PROFILE META
+   STATS
 ========================= */
 
-.profile-meta {
+.profile-stats {
   display: grid;
-  gap: 12px;
-  margin-bottom: 30px;
+  grid-template-columns: repeat(3, 1fr);
+  margin: 34px 0;
+  text-align: center;
+}
+
+.profile-stats strong {
+  display: block;
+  font-size: 16px;
+}
+
+.profile-stats span {
+  font-size: 12px;
+  opacity: 0.6;
 }
 
 /* =========================
-   ACTION BUTTONS
+   ACTIONS
 ========================= */
 
 .profile-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 12px;
-  padding-top: 22px;
+  gap: 14px;
+  padding-top: 26px;
   border-top: 1px solid rgba(255,255,255,0.35);
 }
 
+/* =========================
+   LIQUID GLASS BUTTONS
+========================= */
+
 .profile-btn {
-  padding: 10px 22px;
+  position: relative;
+  isolation: isolate;
+
+  padding: 12px 26px;
   border-radius: 999px;
+
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
 
-  background: rgba(255,255,255,0.45);
-  border: 1px solid rgba(255,255,255,0.55);
-  color: var(--text-dark);
+  color: #1f2937;
+  border: 1px solid rgba(255,255,255,0.6);
 
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,0.85),
+      rgba(230,235,240,0.45)
+    );
 
-  transition: background 0.2s ease, transform 0.15s ease;
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.9),
+    0 10px 30px rgba(0,0,0,0.18);
+
+  transition:
+    transform 0.18s cubic-bezier(.22,1,.36,1),
+    box-shadow 0.18s ease,
+    background 0.18s ease;
+}
+
+.profile-btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+
+  background: radial-gradient(
+    120% 140% at 50% 0%,
+    rgba(255,255,255,0.9),
+    transparent 55%
+  );
+
+  opacity: 0.6;
+  z-index: -1;
 }
 
 .profile-btn:hover {
-  background: rgba(255,255,255,0.65);
-  transform: translateY(-1px);
+  transform: translateY(-2px) scale(1.03);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,1),
+    0 18px 44px rgba(0,0,0,0.28);
 }
 
 .profile-btn:active {
-  transform: translateY(0);
+  transform: translateY(0) scale(0.98);
 }
 
 .profile-btn.danger {
-  color: #e53935;
-  border-color: rgba(229,57,53,0.45);
+  color: #b91c1c;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,230,230,0.85),
+      rgba(255,200,200,0.45)
+    );
+
+  border-color: rgba(185,28,28,0.45);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.9),
+    0 10px 28px rgba(185,28,28,0.25);
 }
 
 .profile-btn.danger:hover {
-  background: rgba(229,57,53,0.12);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,210,210,0.9),
+      rgba(255,180,180,0.55)
+    );
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,1),
+    0 20px 46px rgba(185,28,28,0.35);
 }
 
 /* =========================
@@ -153,11 +267,12 @@
   padding: 28px 30px;
   border-radius: 20px;
 
-  background: linear-gradient(
-    180deg,
-    rgba(255,255,255,0.8),
-    rgba(210,215,220,0.4)
-  );
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,0.85),
+      rgba(210,215,220,0.4)
+    );
 
   backdrop-filter: blur(26px) saturate(180%);
   -webkit-backdrop-filter: blur(26px) saturate(180%);
@@ -222,7 +337,11 @@
 @media (max-width: 768px) {
   .profile-glass-card {
     padding: 30px 24px;
-    margin: 0 16px;
+  }
+
+  .profile-stats {
+    grid-template-columns: 1fr;
+    gap: 14px;
   }
 
   .dialog-content {

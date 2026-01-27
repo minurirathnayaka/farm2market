@@ -12,9 +12,7 @@ import {
 } from "chart.js";
 import { Line } from "react-chartjs-2";
 
-/* styles – will be refactored after */
 import "../../styles/pages/prediction-dashboard.css";
-
 
 /* =========================
    Chart.js setup
@@ -46,12 +44,22 @@ const STATUS_MESSAGES = [
   "Finalizing results",
 ];
 
+const LOADER_MIN = 6000; // HARD minimum: 6s
+const LOADER_MAX_EXTRA = 2000; // + up to 2s
+
 const todayISO = () => new Date().toISOString().slice(0, 10);
 const addDaysISO = (d) => {
   const x = new Date();
   x.setDate(x.getDate() + d);
   return x.toISOString().slice(0, 10);
 };
+
+/* =========================
+   Retry helpers
+========================= */
+const MAX_MODEL_RETRIES = 5;
+const retryDelay = (attempt) =>
+  new Promise((res) => setTimeout(res, 800 * attempt));
 
 /* =========================
    Component
@@ -75,41 +83,66 @@ export default function PredictionDashboard() {
   const [error, setError] = useState("");
 
   /* =========================
-     Load models (once)
+     Load models
   ========================= */
   useEffect(() => {
     const controller = new AbortController();
     abortRef.current = controller;
+    let cancelled = false;
 
-    fetch(`${API_BASE}/models`, { signal: controller.signal })
-      .then((r) => {
-        if (!r.ok) throw new Error("Model registry unavailable");
-        return r.json();
-      })
-      .then((d) => setModels(d.models || []))
-      .catch(() => {
-        setError("Unable to load prediction models.");
-      });
+    const loadModels = async () => {
+      for (let attempt = 1; attempt <= MAX_MODEL_RETRIES; attempt++) {
+        try {
+          const res = await fetch(`${API_BASE}/models`, {
+            signal: controller.signal,
+          });
+          if (!res.ok) throw new Error();
 
-    return () => controller.abort();
+          const data = await res.json();
+          if (!cancelled) {
+            setModels(data.models || []);
+            setError("");
+          }
+          return;
+        } catch {
+          if (attempt === MAX_MODEL_RETRIES && !cancelled) {
+            setError(
+              "Price prediction service is currently offline. " +
+              "This is expected during development hours."
+            );
+          } else {
+            await retryDelay(attempt);
+          }
+        }
+      }
+    };
+
+    loadModels();
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
   }, []);
 
   /* =========================
      Parse models
   ========================= */
-  const parsed = useMemo(() => {
-    return models.map((m) => {
-      const parts = m.split("_");
-      const market = parts.pop();
-      const veg = parts.join("_");
-      return { veg, market };
-    });
-  }, [models]);
+  const parsed = useMemo(
+    () =>
+      models.map((m) => {
+        const parts = m.split("_");
+        const market = parts.pop();
+        const veg = parts.join("_");
+        return { veg, market };
+      }),
+    [models]
+  );
 
   const vegetables = useMemo(
     () => [...new Set(parsed.map((p) => p.veg))],
     [parsed]
   );
+
   const markets = useMemo(
     () => [...new Set(parsed.map((p) => p.market))],
     [parsed]
@@ -125,16 +158,25 @@ export default function PredictionDashboard() {
     setError("");
     setLoading(true);
     setProgress(0);
+    setStatus("");
 
     const controller = new AbortController();
     abortRef.current = controller;
 
+    const startTime = Date.now();
+    const totalDuration =
+      LOADER_MIN + Math.random() * LOADER_MAX_EXTRA;
+    const stepDuration = totalDuration / STATUS_MESSAGES.length;
+
     let idx = 0;
     statusTimerRef.current = setInterval(() => {
-      setStatus(STATUS_MESSAGES[idx] || "");
-      setProgress((p) => Math.min(p + 100 / STATUS_MESSAGES.length, 95));
+      setStatus(STATUS_MESSAGES[idx]);
+      setProgress(Math.min(((idx + 1) / STATUS_MESSAGES.length) * 95, 95));
       idx++;
-    }, 700);
+      if (idx >= STATUS_MESSAGES.length) {
+        clearInterval(statusTimerRef.current);
+      }
+    }, stepDuration);
 
     try {
       const params = new URLSearchParams({
@@ -150,24 +192,36 @@ export default function PredictionDashboard() {
       );
 
       if (!res.ok) throw new Error();
-
       const data = await res.json();
       setForecast(data);
     } catch {
-      setError("Prediction service is temporarily unavailable.");
+      setError("Unable to generate forecast right now.");
     } finally {
-      clearInterval(statusTimerRef.current);
-      setLoading(false);
-      setProgress(0);
+      const elapsed = Date.now() - startTime;
+      const remaining = Math.max(0, totalDuration - elapsed);
+
+      setTimeout(() => {
+        setProgress(100);
+        setTimeout(() => setLoading(false), 700);
+      }, remaining);
     }
   };
+
+  /* =========================
+     Cleanup
+  ========================= */
+  useEffect(() => {
+    return () => {
+      abortRef.current?.abort();
+      clearInterval(statusTimerRef.current);
+    };
+  }, []);
 
   /* =========================
      Chart data
   ========================= */
   const chartData = useMemo(() => {
     if (!forecast?.predictions) return null;
-
     return {
       labels: forecast.predictions.map((p) =>
         new Date(p.ds).toLocaleDateString()
@@ -202,21 +256,10 @@ export default function PredictionDashboard() {
   }, [forecast]);
 
   /* =========================
-     Cleanup on unmount
-  ========================= */
-  useEffect(() => {
-    return () => {
-      abortRef.current?.abort();
-      clearInterval(statusTimerRef.current);
-    };
-  }, []);
-
-  /* =========================
      Render
   ========================= */
   return (
     <div className="dashboard-container prediction-dashboard">
-
       <h1 className="dashboard-title">Market Predictions</h1>
       <p className="dashboard-subtitle">AI-powered price forecasts</p>
 
@@ -224,9 +267,7 @@ export default function PredictionDashboard() {
         <select value={veg} onChange={(e) => setVeg(e.target.value)}>
           <option value="">Select vegetable</option>
           {vegetables.map((v) => (
-            <option key={v} value={v}>
-              {v.replace(/_/g, " ")}
-            </option>
+            <option key={v} value={v}>{v.replace(/_/g, " ")}</option>
           ))}
         </select>
 
@@ -247,9 +288,7 @@ export default function PredictionDashboard() {
 
       <div className="chart-card liquid-glass">
         {!forecast && !loading && !error && (
-          <div className="chart-placeholder">
-            Select inputs and run forecast
-          </div>
+          <div className="chart-placeholder">Select inputs and run forecast</div>
         )}
 
         {loading && (

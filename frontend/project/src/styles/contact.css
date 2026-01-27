@@ -5,13 +5,12 @@
 .contact-hero {
   position: relative;
   min-height: 100vh;
-  padding-top: 96px;
-  padding-bottom: 520px; /* ⬆ MORE SPACE FOR OVERLAP */
 
   background:
     linear-gradient(
-      rgba(0, 0, 0, 0.28),
-      rgba(0, 0, 0, 0.28)
+      to bottom,
+      rgba(0,0,0,0.35),
+      rgba(0,0,0,0.55)
     ),
     url("https://images.pexels.com/photos/4094697/pexels-photo-4094697.jpeg")
       center / cover no-repeat;
@@ -21,7 +20,6 @@
   justify-content: center;
 }
 
-/* overlay div kept for JSX */
 .contact-hero-overlay {
   position: absolute;
   inset: 0;
@@ -33,16 +31,18 @@
   z-index: 2;
   text-align: center;
   color: #fff;
-  transform: translateY(-60px); /* 🔼 MOVE TEXT UP */
+
+  transform: translateY(-300px);
 }
 
 .contact-hero-content h1 {
-  font-size: 48px;
+  font-size: clamp(3rem, 5vw, 4rem);
   margin-bottom: 12px;
+  letter-spacing: -0.02em;
 }
 
 .contact-hero-content p {
-  font-size: 18px;
+  font-size: 1.15rem;
   opacity: 0.95;
 }
 
@@ -52,7 +52,7 @@
 
 .contact-content {
   max-width: 1200px;
-  margin: -660px auto 120px; /* ⬆ BRING BOTH CARDS UP */
+  margin: -680px auto 140px;
   padding: 0 20px;
 }
 
@@ -60,30 +60,78 @@
 .contact-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 40px;
+  gap: 42px;
 }
 
-/* GLASS BOXES */
+/* =========================
+   LIQUID GLASS PANELS
+========================= */
+
 .contact-info,
 .contact-form {
-  background: rgba(255, 255, 255, 0.65);
-  backdrop-filter: blur(18px);
-  border-radius: 22px;
-  padding: 32px;
-  box-shadow: 0 40px 90px rgba(0,0,0,0.22);
+  position: relative;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,0.75),
+      rgba(255,255,255,0.35)
+    );
+
+  backdrop-filter: blur(34px) saturate(180%);
+  -webkit-backdrop-filter: blur(34px) saturate(180%);
+
+  border-radius: 28px;
+  padding: 38px;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.9),
+    inset 0 -1px 0 rgba(255,255,255,0.25),
+    0 40px 100px rgba(0,0,0,0.28);
+
+  border: 1px solid rgba(255,255,255,0.45);
 }
 
-/* INFO */
+.contact-info::before,
+.contact-form::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+
+  background:
+    radial-gradient(
+      120% 100% at top left,
+      rgba(255,255,255,0.35),
+      transparent 60%
+    );
+}
+
+/* =========================
+   INFO
+========================= */
+
 .info-item {
-  margin-bottom: 24px;
+  margin-bottom: 28px;
 }
 
 .info-item h3 {
-  margin-bottom: 6px;
   font-size: 18px;
+  margin-bottom: 6px;
+  font-weight: 700;
 }
 
-/* FORM */
+.info-item p {
+  font-size: 15px;
+  line-height: 1.6;
+  opacity: 0.85;
+}
+
+/* =========================
+   FORM
+========================= */
+
 .contact-form {
   display: flex;
   flex-direction: column;
@@ -92,30 +140,108 @@
 
 .contact-form input,
 .contact-form textarea {
-  width: 100%;
   background: rgba(255,255,255,0.9);
-  border-radius: 12px;
-  border: none;
+  backdrop-filter: blur(10px);
+
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.55);
+
   padding: 14px 16px;
   font-size: 15px;
+  color: #222;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.85);
+}
+
+.contact-form input::placeholder,
+.contact-form textarea::placeholder {
+  color: rgba(0,0,0,0.45);
 }
 
 .contact-form input:focus,
 .contact-form textarea:focus {
   outline: none;
+  border-color: rgba(255,255,255,0.9);
 }
 
-/* RESPONSIVE */
+.contact-form button {
+  margin-top: 6px;
+  padding: 14px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+/* =========================
+   ALERT DIALOG (RADIX)
+========================= */
+
+.alert-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(6px);
+  z-index: 1000;
+}
+
+.alert-content {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  width: 90%;
+  max-width: 420px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,0.85),
+      rgba(255,255,255,0.55)
+    );
+
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+
+  border-radius: 24px;
+  padding: 32px;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.9),
+    0 30px 80px rgba(0,0,0,0.35);
+
+  border: 1px solid rgba(255,255,255,0.5);
+  z-index: 1001;
+}
+
+.alert-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  color: #111;
+}
+
+.alert-description {
+  font-size: 15px;
+  line-height: 1.6;
+  color: #333;
+  margin-bottom: 24px;
+}
+
+/* =========================
+   MOBILE
+========================= */
+
 @media (max-width: 900px) {
+  .contact-hero-content {
+    transform: translateY(-220px);
+  }
+
+  .contact-content {
+    margin: -560px auto 60px;
+  }
+
   .contact-grid {
     grid-template-columns: 1fr;
   }
-
-.contact-content {
-  max-width: 1200px;
-  margin: -440px auto 0; /* ⬅ remove bottom gap */
-  padding: 0 20px;
 }
-}
-
-

@@ -6,13 +6,12 @@ import "../styles/layout.css";
 /**
  * DashboardLayout
  * - Owns layout + navigation chrome only
- * - Does NOT fetch data
- * - Safe for auth delays and edge cases
+ * - Role-aware sidebar
+ * - Common dashboard for buyer + transporter
  */
 export default function DashboardLayout() {
   const { role, loading, user } = useAuth();
 
-  // Never return null in prod – show skeleton instead
   if (loading) {
     return (
       <div className="dashboard-shell">
@@ -28,31 +27,19 @@ export default function DashboardLayout() {
     <div className="dashboard-shell">
       <aside className="dashboard-sidebar">
         {/* =========================
-           Guest
+           Common Dashboard
+           buyer + transporter
         ========================= */}
-        {!user && (
-          <NavLink
-            to="/dashboard/guest"
-            className={({ isActive }) =>
-              isActive ? "active" : undefined
-            }
-          >
-            Guest Dashboard
-          </NavLink>
-        )}
-
-        {/* =========================
-           Buyer
-        ========================= */}
-        {role === "buyer" && (
+        {(role === "buyer" || role === "transporter") && (
           <>
             <NavLink
-              to="/dashboard/buyer"
+              to="/dashboard"
+              end
               className={({ isActive }) =>
                 isActive ? "active" : undefined
               }
             >
-              Buyer Dashboard
+              Dashboard
             </NavLink>
 
             <NavLink
@@ -95,23 +82,9 @@ export default function DashboardLayout() {
                 isActive ? "active" : undefined
               }
             >
-              Predictions
+              Market Predictions
             </NavLink>
           </>
-        )}
-
-        {/* =========================
-           Transporter
-        ========================= */}
-        {role === "transporter" && (
-          <NavLink
-            to="/dashboard/transporter"
-            className={({ isActive }) =>
-              isActive ? "active" : undefined
-            }
-          >
-            Transporter Dashboard
-          </NavLink>
         )}
 
         {/* =========================

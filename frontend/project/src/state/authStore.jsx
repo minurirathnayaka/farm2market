@@ -29,6 +29,9 @@ export function AuthProvider({ children }) {
   const [role, setRole] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // 🔹 NEW: logout signal (does not change existing behavior)
+  const [justLoggedOut, setJustLoggedOut] = useState(false);
+
   useEffect(() => {
     mountedRef.current = true;
 
@@ -81,7 +84,6 @@ export function AuthProvider({ children }) {
           }
         }
       } catch (err) {
-        // Firestore failure should never brick the app
         console.error("Auth profile load failed", err);
         if (mountedRef.current) {
           setRole("buyer");
@@ -106,6 +108,7 @@ export function AuthProvider({ children }) {
       if (mountedRef.current) {
         setUser(null);
         setRole(null);
+        setJustLoggedOut(true); // 🔹 signal UI
       }
     }
   };
@@ -117,6 +120,10 @@ export function AuthProvider({ children }) {
         role,
         loading,
         logout,
+
+        // 🔹 expose logout signal
+        justLoggedOut,
+        clearJustLoggedOut: () => setJustLoggedOut(false),
 
         // role helpers
         isBuyer: role === "buyer",

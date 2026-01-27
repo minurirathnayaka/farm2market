@@ -1,34 +1,22 @@
 /* =================================
    PUBLIC HEADER – REAL HEADER
-   Used by PublicLayout.jsx
 ================================= */
-
 
 .header {
   position: sticky;
   top: 0;
   z-index: 50;
 
-  background: rgba(255,255,255,0.85);
-  backdrop-filter: blur(14px);
-  border-bottom: 1px solid rgba(0,0,0,0.08);
+  background: transparent;
+  border-bottom: none;
 }
-/* Overlay mode (landing pages) */
+
+/* Overlay pages */
 .header.header-overlay {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
-
-  background: transparent;
-  backdrop-filter: none;
-  border-bottom: none;
-}
-
-/* Overlay variant for landing pages */
-.header-overlay {
-  background: transparent;
-  border-bottom: none;
 }
 
 /* ================= LAYOUT ================= */
@@ -43,20 +31,22 @@
   align-items: center;
 }
 
-/* ================= ACTIONS ================= */
+/* ================= GLASS CHIPS ================= */
 
-.header-buttons {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
 
-/* Profile trigger button */
-.profile-btn {
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
+
+/* Profile / avatar glass */
+.header-overlay .profile-btn {
+  padding: 6px;
+  border-radius: 999px;
+
+  background: rgba(255,255,255,0.28);
+  backdrop-filter: blur(26px) saturate(180%);
+  -webkit-backdrop-filter: blur(26px) saturate(180%);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.7),
+    0 8px 22px rgba(0,0,0,0.12);
 }
 
 /* ================= MOBILE ================= */

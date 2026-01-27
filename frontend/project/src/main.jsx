@@ -5,16 +5,16 @@ import { Toaster } from "sonner";
 
 import router from "./app/router.jsx";
 import { AuthProvider } from "./state/authStore.jsx";
+import Chatbot from "./components/ai/Chatbot.jsx";
 
 /**
  * Global crash fallback
- * Prevents white screen of death in prod
  */
 function RootFallback() {
   return (
     <div style={{ padding: "2rem", textAlign: "center" }}>
       <h2>Something went wrong</h2>
-      <p>Please refresh the page. If the issue persists, try again later.</p>
+      <p>Please refresh the page.</p>
     </div>
   );
 }
@@ -32,12 +32,10 @@ ReactDOM.createRoot(rootElement).render(
         <RouterProvider router={router} />
       </React.Suspense>
 
-      <Toaster
-        richColors
-        position="top-right"
-        closeButton
-        duration={4000}
-      />
+      <Toaster richColors position="top-right" closeButton duration={4000} />
+
+      {/* GLOBAL CHATBOT */}
+      <Chatbot />
     </AuthProvider>
   </React.StrictMode>
 );

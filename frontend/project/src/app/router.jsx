@@ -3,22 +3,18 @@ import { lazy, Suspense } from "react";
 
 /* ======================================================
    Layouts
-   These define the chrome of the app
 ====================================================== */
 import PublicLayout from "../layouts/PublicLayout";
 import DashboardLayout from "../layouts/DashboardLayout";
 
 /* ======================================================
    Guards
-   AuthGuard -> logged in
-   RoleGuard -> role-based access
 ====================================================== */
 import AuthGuard from "../js/auth-guard.jsx";
 import RoleGuard from "../js/role-guard.jsx";
 
 /* ======================================================
-   Public pages (eager-loaded)
-   These are light and needed immediately
+   Public pages
 ====================================================== */
 import Landing from "../pages/Landing/Landing";
 import About from "../pages/About/About";
@@ -26,14 +22,10 @@ import Contact from "../pages/Contact/Contact";
 import Profile from "../pages/Profile/Profile";
 
 /* ======================================================
-   Dashboard pages (lazy-loaded)
-   Heavy pages → load only when needed
+   Dashboard pages (lazy)
 ====================================================== */
-const GuestDashboard = lazy(() =>
-  import("../pages/Dashboards/GuestDashboard")
-);
-const BuyerDashboard = lazy(() =>
-  import("../pages/Dashboards/BuyerDashboard")
+const CommonDashboard = lazy(() =>
+  import("../pages/Dashboards/CommonDashboard")
 );
 const FarmerDashboard = lazy(() =>
   import("../pages/Dashboards/Farmer/FarmerDashboard")
@@ -83,8 +75,6 @@ const router = createBrowserRouter([
       { index: true, element: <Landing /> },
       { path: "about", element: <About /> },
       { path: "contact", element: <Contact /> },
-
-      // Profile is public-layout but auth-protected
       {
         path: "profile",
         element: (
@@ -98,38 +88,27 @@ const router = createBrowserRouter([
 
   /* =========================
      Dashboard routes
-     Everything here lives under /dashboard
   ========================= */
   {
     path: "/dashboard",
     element: <DashboardLayout />,
     errorElement: <RouteError />,
     children: [
-      // Guest dashboard (no auth, read-only style)
+      /* BUYER DASHBOARD ONLY */
       {
-        path: "guest",
-        element: (
-          <Suspense fallback={<PageLoader />}>
-            <GuestDashboard />
-          </Suspense>
-        ),
-      },
-
-      // Buyer dashboard
-      {
-        path: "buyer",
+        index: true,
         element: (
           <AuthGuard>
             <RoleGuard allow={["buyer"]}>
               <Suspense fallback={<PageLoader />}>
-                <BuyerDashboard />
+                <CommonDashboard />
               </Suspense>
             </RoleGuard>
           </AuthGuard>
         ),
       },
 
-      // Farmer dashboard
+      /* FARMER DASHBOARD */
       {
         path: "farmer",
         element: (
@@ -143,7 +122,7 @@ const router = createBrowserRouter([
         ),
       },
 
-      // Transporter dashboard
+      /* TRANSPORTER DASHBOARD */
       {
         path: "transporter",
         element: (
@@ -157,12 +136,12 @@ const router = createBrowserRouter([
         ),
       },
 
-      // Shared predictions page (buyer + farmer)
+      /* PREDICTIONS */
       {
         path: "predictions",
         element: (
           <AuthGuard>
-            <RoleGuard allow={["buyer", "farmer"]}>
+            <RoleGuard allow={["buyer", "transporter", "farmer"]}>
               <Suspense fallback={<PageLoader />}>
                 <PredictionDashboard />
               </Suspense>
@@ -171,7 +150,7 @@ const router = createBrowserRouter([
         ),
       },
 
-      // Farmer-only stock management
+      /* FARMER-ONLY STOCK SUBMISSION */
       {
         path: "stock",
         element: (
@@ -188,7 +167,7 @@ const router = createBrowserRouter([
   },
 
   /* =========================
-     Catch-all 404
+     Catch-all
   ========================= */
   {
     path: "*",

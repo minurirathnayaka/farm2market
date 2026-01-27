@@ -17,7 +17,7 @@ import { useAuth } from "../../state/authStore";
 import { toast } from "sonner";
 
 export default function Profile() {
-  const { user, loading } = useAuth();
+  const { user, loading, logout } = useAuth();
 
   const [profile, setProfile] = useState(null);
 
@@ -79,25 +79,34 @@ export default function Profile() {
       }
     }
 
+    setWorking(true);
+    let passwordChanged = false;
+
     try {
-      setWorking(true);
+      if (newPassword) {
+        await updatePassword(auth.currentUser, newPassword);
+        passwordChanged = true;
+      }
 
       await updateDoc(doc(db, "users", user.uid), {
         firstName,
         lastName,
       });
 
-      if (newPassword) {
-        await updatePassword(auth.currentUser, newPassword);
-      }
-
       toast.success("Profile updated");
+
+      // close dialog + reset inputs
       setEditOpen(false);
       setNewPassword("");
       setConfirmPassword("");
 
       const refreshed = await getDoc(doc(db, "users", user.uid));
       setProfile(refreshed.data());
+
+      // 🔴 LOGOUT VIA STORE (triggers login modal)
+      if (passwordChanged) {
+        await logout();
+      }
     } catch (err) {
       if (err.code === "auth/requires-recent-login") {
         toast.error("Please log in again to change your password");
@@ -121,23 +130,12 @@ export default function Profile() {
 
     try {
       setWorking(true);
-
-      // delete Firestore profile
       await deleteDoc(doc(db, "users", user.uid));
-
-      // delete Auth user
       await deleteUser(user);
-
       toast.success("Account deleted successfully");
-
-      // final verification redirect
       window.location.href = "/";
     } catch (err) {
-      if (err.code === "auth/requires-recent-login") {
-        toast.error("Please log in again to delete your account");
-      } else {
-        toast.error("Failed to delete account");
-      }
+      toast.error("Please log in again to delete your account");
     } finally {
       setWorking(false);
     }
@@ -184,13 +182,7 @@ export default function Profile() {
         <Dialog.Portal>
           <Dialog.Overlay className="dialog-overlay" />
           <Dialog.Content className="dialog-content glass">
-            <Dialog.Title className="dialog-title">
-              Edit Profile
-            </Dialog.Title>
-
-            <Dialog.Description className="dialog-description">
-              Update your name or password. Email cannot be changed.
-            </Dialog.Description>
+            <Dialog.Title>Edit Profile</Dialog.Title>
 
             <form onSubmit={handleEditSubmit}>
               <input
@@ -198,23 +190,22 @@ export default function Profile() {
                 onChange={(e) => setFirstName(e.target.value)}
                 placeholder="First name"
               />
-
               <input
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
                 placeholder="Last name"
               />
-
               <input
                 type="password"
                 placeholder="New password"
+                autoComplete="new-password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
               />
-
               <input
                 type="password"
                 placeholder="Confirm password"
+                autoComplete="new-password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
               />
@@ -227,7 +218,6 @@ export default function Profile() {
                 >
                   Cancel
                 </button>
-
                 <button
                   type="submit"
                   className="profile-btn"

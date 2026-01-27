@@ -74,12 +74,11 @@ export default function FarmerDashboard() {
           </p>
         </div>
 
-        {/* Explicit navigation intent */}
         <button
-          className="btn farmer-back-btn"
-          onClick={() => navigate("/dashboard/buyer")}
+          className="btn secondary"
+          onClick={() => navigate("/")}
         >
-          ← View Market Overview
+          ← Home
         </button>
       </div>
 
@@ -127,41 +126,49 @@ export default function FarmerDashboard() {
         )}
 
         {!loading && !error && stocks.length > 0 && (
-          <table className="farmer-stock-table">
-            <thead>
-              <tr>
-                <th>Vegetable</th>
-                <th>Market</th>
-                <th>Quantity</th>
-                <th>Price</th>
-                <th>Added</th>
-              </tr>
-            </thead>
-            <tbody>
-              {stocks.map((s) => (
-                <tr
-                  key={s.id}
-                  className="clickable-row"
-                  onClick={() =>
-                    goToPrediction(s.vegetable, s.market)
-                  }
-                  title="View price prediction"
-                >
-                  <td>{s.vegetable}</td>
-                  <td>{s.market}</td>
-                  <td>{s.quantity} kg</td>
-                  <td>LKR {s.price}</td>
-                  <td>
-                    {s.createdAt?.toDate
-                      ? s.createdAt
-                          .toDate()
-                          .toLocaleDateString()
-                      : "-"}
-                  </td>
+          <div className="farmer-table-wrapper">
+            <table className="farmer-stock-table">
+              <thead>
+                <tr>
+                  <th>Vegetable</th>
+                  <th>Market</th>
+                  <th>Pickup Location</th>
+                  <th>Quality</th>
+                  <th>Quantity</th>
+                  <th>Price</th>
+                  <th>Added</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {stocks.map((s) => (
+                  <tr
+                    key={s.id}
+                    className="clickable-row"
+                    onClick={() =>
+                      goToPrediction(s.vegetable, s.market)
+                    }
+                    title="View price prediction"
+                  >
+                    <td>{s.vegetable}</td>
+                    <td>{s.market}</td>
+                    <td>{s.pickupLocation || "-"}</td>
+                    <td className={`quality ${s.quality}`}>
+                      {s.quality || "-"}
+                    </td>
+                    <td>{s.quantity} kg</td>
+                    <td>LKR {s.price}</td>
+                    <td>
+                      {s.createdAt?.toDate
+                        ? s.createdAt
+                            .toDate()
+                            .toLocaleDateString()
+                        : "-"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </div>

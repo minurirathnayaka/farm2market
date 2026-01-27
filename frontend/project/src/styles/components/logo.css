@@ -3,12 +3,40 @@
 ================================= */
 
 .logo {
-  font-weight: 800;
-  font-size: 1.2rem;
-  letter-spacing: -0.02em;
+  font-weight: 900;
+  font-size: 1.6rem;          /* bigger */
+  letter-spacing: -0.03em;
   text-decoration: none;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  line-height: 1;
 }
 
 .logo-text {
   color: #2c2c2c;
+}
+
+/* Subtle brand accent */
+.logo-text span {
+  color: #2e7d32;             /* matches your green theme */
+}
+
+/* Slight emphasis on hero pages */
+.header-overlay .logo {
+  font-size: 1.8rem;
+}
+
+/* Hover polish */
+.logo:hover {
+  opacity: 0.9;
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .logo {
+    font-size: 1.4rem;
+  }
 }

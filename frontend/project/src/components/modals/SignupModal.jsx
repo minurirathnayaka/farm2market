@@ -5,6 +5,46 @@ import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "../../js/firebase";
 import { toast } from "sonner";
 
+/* =========================
+   HELPERS
+========================= */
+
+// retry helper for safe operations
+async function retry(fn, retries = 3, delay = 500) {
+  let lastError;
+  for (let i = 0; i < retries; i++) {
+    try {
+      return await fn();
+    } catch (err) {
+      lastError = err;
+      await new Promise((r) => setTimeout(r, delay * (i + 1)));
+    }
+  }
+  throw lastError;
+}
+
+// firebase error → user message
+function firebaseErrorMessage(err) {
+  if (!err || !err.code) {
+    return "Something went wrong. Please try again.";
+  }
+
+  switch (err.code) {
+    case "auth/email-already-in-use":
+      return "This email is already registered";
+    case "auth/invalid-email":
+      return "Invalid email address";
+    case "auth/weak-password":
+      return "Password is too weak";
+    case "auth/network-request-failed":
+      return "Network error. Check your connection";
+    case "permission-denied":
+      return "Permission denied. Please contact support";
+    default:
+      return err.message || "Signup failed";
+  }
+}
+
 export default function SignupModal({ onClose, onLogin }) {
   const [loading, setLoading] = useState(false);
 
@@ -13,7 +53,6 @@ export default function SignupModal({ onClose, onLogin }) {
     if (loading) return;
 
     const form = e.target;
-
     const firstName = form.firstName.value.trim();
     const lastName = form.lastName.value.trim();
     const email = form.email.value.trim();
@@ -26,48 +65,64 @@ export default function SignupModal({ onClose, onLogin }) {
       return;
     }
 
-    // basic phone sanity check (not country-specific yet)
-    if (phone.length < 9) {
-      toast.error("Please enter a valid phone number");
+    setLoading(true);
+    let user;
+
+    /* =========================
+       AUTH (NO RETRY)
+    ========================== */
+    try {
+      const cred = await createUserWithEmailAndPassword(auth, email, password);
+      user = cred.user;
+    } catch (err) {
+      toast.error(firebaseErrorMessage(err));
+      setLoading(false);
       return;
     }
 
+    /* =========================
+       PROFILE (NON-CRITICAL)
+    ========================== */
     try {
-      setLoading(true);
-
-      const { user } = await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-
       await updateProfile(user, {
         displayName: `${firstName} ${lastName}`,
       });
+    } catch (err) {
+      console.warn("Profile update failed", err);
+    }
 
-      await setDoc(doc(db, "users", user.uid), {
-        uid: user.uid,
-        firstName,
-        lastName,
-        email: user.email,
-        phone,
-        role,
-        createdAt: serverTimestamp(),
-      });
+    /* =========================
+       FIRESTORE (RETRY SAFE)
+    ========================== */
+    try {
+      await retry(() =>
+        setDoc(doc(db, "users", user.uid), {
+          uid: user.uid,
+          firstName,
+          lastName,
+          email: user.email,
+          phone,
+          role,
+          createdAt: serverTimestamp(),
+        })
+      );
+    } catch (err) {
+      toast.error(firebaseErrorMessage(err));
+      setLoading(false);
+      return;
+    }
 
+    /* =========================
+       UI (ISOLATED)
+    ========================== */
+    try {
       toast.success("Account created successfully");
       onClose();
     } catch (err) {
-      if (err.code === "auth/email-already-in-use") {
-        toast.error("Email already in use");
-      } else if (err.code === "auth/weak-password") {
-        toast.error("Password too weak");
-      } else {
-        toast.error("Signup failed");
-      }
-    } finally {
-      setLoading(false);
+      console.error("UI cleanup error", err);
     }
+
+    setLoading(false);
   };
 
   return (
@@ -103,12 +158,7 @@ export default function SignupModal({ onClose, onLogin }) {
 
             <div className="form-group">
               <div className="input-wrapper">
-                <input
-                  name="phone"
-                  type="tel"
-                  placeholder=" "
-                  required
-                />
+                <input name="phone" type="tel" required />
                 <label>Phone Number</label>
               </div>
             </div>

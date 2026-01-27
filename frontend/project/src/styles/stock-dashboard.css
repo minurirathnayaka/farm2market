@@ -17,11 +17,69 @@
   gap: 16px;
 }
 
+/* Fix heading breaking into two lines */
+.dashboard-title {
+  white-space: nowrap;
+}
+
+/* ================= CONTENT LAYOUT ================= */
+
+.stock-content {
+  display: grid;
+  grid-template-columns: 520px 1fr;
+  gap: 40px;
+  align-items: stretch;
+}
+
 /* ================= CARD ================= */
 
 .stock-card {
   padding: 32px;
   max-width: 520px;
+  height: 100%;
+}
+
+/* ================= INFO PANEL ================= */
+
+.stock-info {
+  padding: 36px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Info panel title */
+.stock-info h3 {
+  font-size: 22px;
+  margin-bottom: 20px;
+  font-weight: 600;
+}
+
+/* Info list */
+.stock-info ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.stock-info li {
+  font-size: 16px;
+  line-height: 1.7;
+  opacity: 0.95;
+}
+
+.stock-info li strong {
+  font-weight: 600;
+}
+
+/* Bottom note */
+.stock-info-note {
+  margin-top: auto;
+  font-size: 14px;
+  opacity: 0.8;
 }
 
 /* ================= FORM ================= */
@@ -43,14 +101,40 @@
   opacity: 0.85;
 }
 
-.form-row input {
+/* INPUT + SELECT */
+
+.form-row input,
+.form-row select {
   padding: 12px 14px;
   border-radius: 10px;
   border: none;
   outline: none;
+  color: #000;
+  background: rgba(255, 255, 255, 0.9);
+  font-size: 14px;
+}
+
+.form-row input::placeholder {
+  color: #6b7280;
 }
 
 .form-error {
   color: #ef4444;
   font-size: 14px;
+}
+
+/* ================= BUTTONS ================= */
+
+.stock-form .btn {
+  width: 100%;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 1024px) {
+  .stock-content {
+    grid-template-columns: 1fr;
+  }
 }

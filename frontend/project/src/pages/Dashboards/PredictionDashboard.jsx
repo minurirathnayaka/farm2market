@@ -31,7 +31,7 @@ ChartJS.register(
    API config
 ========================= */
 const API_BASE =
-  import.meta.env.VITE_API_BASE_URL || "https://farm2market.org";
+  import.meta.env.VITE_API_BASE_URL || "/api";
 
 /* =========================
    UX helpers

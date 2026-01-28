@@ -16,12 +16,12 @@
 }
 
 .logo-text {
-  color: #2c2c2c;
+  color: #000000;
 }
 
 /* Subtle brand accent */
 .logo-text span {
-  color: #2e7d32;             /* matches your green theme */
+  color: #ffffff;             /* matches your green theme */
 }
 
 /* Slight emphasis on hero pages */

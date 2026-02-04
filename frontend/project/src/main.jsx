@@ -5,11 +5,11 @@ import { Toaster } from "sonner";
 
 import router from "./app/router.jsx";
 import { AuthProvider } from "./state/authStore.jsx";
+import AccountSetupGate from "./components/ui/AccountSetupGate.jsx";
 import Chatbot from "./components/ai/Chatbot.jsx";
+import "./styles/account-setup.css";
 
-/**
- * Global crash fallback
- */
+
 function RootFallback() {
   return (
     <div style={{ padding: "2rem", textAlign: "center" }}>
@@ -28,9 +28,11 @@ if (!rootElement) {
 ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
     <AuthProvider>
-      <React.Suspense fallback={<RootFallback />}>
-        <RouterProvider router={router} />
-      </React.Suspense>
+      <AccountSetupGate>
+        <React.Suspense fallback={<RootFallback />}>
+          <RouterProvider router={router} />
+        </React.Suspense>
+      </AccountSetupGate>
 
       <Toaster richColors position="top-right" closeButton duration={4000} />
 

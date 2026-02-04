@@ -4,7 +4,8 @@ import { useAuth } from "../state/authStore";
 export default function DashboardRedirect() {
   const { role, loading } = useAuth();
 
-  if (loading) return null;
+  // Block routing until role is resolved
+  if (loading || !role) return null;
 
   if (role === "farmer") {
     return <Navigate to="/dashboard/farmer" replace />;
@@ -18,5 +19,5 @@ export default function DashboardRedirect() {
     return <Navigate to="/dashboard/transporter" replace />;
   }
 
-  return <Navigate to="/" replace />;
+  return null;
 }

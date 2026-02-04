@@ -14,9 +14,6 @@ import { Line } from "react-chartjs-2";
 
 import "../../styles/pages/prediction-dashboard.css";
 
-/* =========================
-   Chart.js setup
-========================= */
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -27,15 +24,8 @@ ChartJS.register(
   Legend
 );
 
-/* =========================
-   API config
-========================= */
-const API_BASE =
-  import.meta.env.VITE_API_BASE_URL || "/api";
+const API_BASE = import.meta.env.VITE_API_BASE_URL || "/api";
 
-/* =========================
-   UX helpers
-========================= */
 const STATUS_MESSAGES = [
   "Establishing secure connection",
   "Routing request",
@@ -44,8 +34,8 @@ const STATUS_MESSAGES = [
   "Finalizing results",
 ];
 
-const LOADER_MIN = 6000; // HARD minimum: 6s
-const LOADER_MAX_EXTRA = 2000; // + up to 2s
+const LOADER_MIN = 6000;
+const LOADER_MAX_EXTRA = 2000;
 
 const todayISO = () => new Date().toISOString().slice(0, 10);
 const addDaysISO = (d) => {
@@ -54,16 +44,10 @@ const addDaysISO = (d) => {
   return x.toISOString().slice(0, 10);
 };
 
-/* =========================
-   Retry helpers
-========================= */
 const MAX_MODEL_RETRIES = 5;
 const retryDelay = (attempt) =>
   new Promise((res) => setTimeout(res, 800 * attempt));
 
-/* =========================
-   Component
-========================= */
 export default function PredictionDashboard() {
   const [searchParams] = useSearchParams();
   const abortRef = useRef(null);
@@ -82,9 +66,7 @@ export default function PredictionDashboard() {
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
 
-  /* =========================
-     Load models
-  ========================= */
+  /* ================= LOAD MODELS ================= */
   useEffect(() => {
     const controller = new AbortController();
     abortRef.current = controller;
@@ -107,8 +89,7 @@ export default function PredictionDashboard() {
         } catch {
           if (attempt === MAX_MODEL_RETRIES && !cancelled) {
             setError(
-              "Price prediction service is currently offline. " +
-              "This is expected during development hours."
+              "Price prediction service is currently offline. This is expected during development hours."
             );
           } else {
             await retryDelay(attempt);
@@ -124,9 +105,7 @@ export default function PredictionDashboard() {
     };
   }, []);
 
-  /* =========================
-     Parse models
-  ========================= */
+  /* ================= PARSE MODELS ================= */
   const parsed = useMemo(
     () =>
       models.map((m) => {
@@ -148,9 +127,7 @@ export default function PredictionDashboard() {
     [parsed]
   );
 
-  /* =========================
-     Prediction runner
-  ========================= */
+  /* ================= RUN PREDICTION ================= */
   const runPrediction = async () => {
     if (!veg || !market || loading) return;
 
@@ -164,8 +141,7 @@ export default function PredictionDashboard() {
     abortRef.current = controller;
 
     const startTime = Date.now();
-    const totalDuration =
-      LOADER_MIN + Math.random() * LOADER_MAX_EXTRA;
+    const totalDuration = LOADER_MIN + Math.random() * LOADER_MAX_EXTRA;
     const stepDuration = totalDuration / STATUS_MESSAGES.length;
 
     let idx = 0;
@@ -207,9 +183,7 @@ export default function PredictionDashboard() {
     }
   };
 
-  /* =========================
-     Cleanup
-  ========================= */
+  /* ================= CLEANUP ================= */
   useEffect(() => {
     return () => {
       abortRef.current?.abort();
@@ -217,9 +191,7 @@ export default function PredictionDashboard() {
     };
   }, []);
 
-  /* =========================
-     Chart data
-  ========================= */
+  /* ================= CHART DATA ================= */
   const chartData = useMemo(() => {
     if (!forecast?.predictions) return null;
     return {
@@ -228,12 +200,12 @@ export default function PredictionDashboard() {
       ),
       datasets: [
         {
-          label: "Predicted Price",
+          label: "Predicted Price per Kg",
           data: forecast.predictions.map((p) => p.yhat),
           borderColor: "#22c55e",
-          borderWidth: 3,
+          borderWidth: 4,
           tension: 0.35,
-          pointRadius: 3,
+          pointRadius: 5,
         },
         {
           label: "Upper Bound",
@@ -255,9 +227,9 @@ export default function PredictionDashboard() {
     };
   }, [forecast]);
 
-  /* =========================
-     Render
-  ========================= */
+  const latest = forecast?.predictions?.slice(-1)[0];
+
+  /* ================= RENDER ================= */
   return (
     <div className="dashboard-container prediction-dashboard">
       <h1 className="dashboard-title">Market Predictions</h1>
@@ -267,7 +239,9 @@ export default function PredictionDashboard() {
         <select value={veg} onChange={(e) => setVeg(e.target.value)}>
           <option value="">Select vegetable</option>
           {vegetables.map((v) => (
-            <option key={v} value={v}>{v.replace(/_/g, " ")}</option>
+            <option key={v} value={v}>
+              {v.replace(/_/g, " ")}
+            </option>
           ))}
         </select>
 
@@ -287,6 +261,18 @@ export default function PredictionDashboard() {
       </div>
 
       <div className="chart-card liquid-glass">
+        {latest && !loading && !error && (
+          <div className="price-kpi">
+            <div className="price-label">Predicted Price per Kg</div>
+            <div className="price-value">
+              Rs. {Math.round(latest.yhat).toLocaleString()}
+            </div>
+            <div className="price-range">
+              Range: {Math.round(latest.yhat_lower)} – {Math.round(latest.yhat_upper)}
+            </div>
+          </div>
+        )}
+
         {!forecast && !loading && !error && (
           <div className="chart-placeholder">Select inputs and run forecast</div>
         )}
@@ -304,7 +290,55 @@ export default function PredictionDashboard() {
         {error && <div className="error-box">{error}</div>}
 
         {chartData && !loading && !error && (
-          <Line data={chartData} options={{ responsive: true }} />
+          <Line
+  data={chartData}
+  options={{
+    responsive: true,
+    plugins: {
+      legend: {
+        labels: {
+          font: {
+            size: 14,
+            weight: "600",
+          },
+        },
+      },
+    },
+    scales: {
+      x: {
+        ticks: {
+          font: {
+            size: 14,
+          },
+        },
+        title: {
+          display: true,
+          text: "Date",
+          font: {
+            size: 16,
+            weight: "600",
+          },
+        },
+      },
+      y: {
+        ticks: {
+          font: {
+            size: 14,
+          },
+        },
+        title: {
+          display: true,
+          text: "Price",
+          font: {
+            size: 16,
+            weight: "600",
+          },
+        },
+      },
+    },
+  }}
+/>
+
         )}
       </div>
     </div>

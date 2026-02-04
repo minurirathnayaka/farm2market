@@ -31,6 +31,7 @@ export default function StockDashboard() {
   const [quality, setQuality] = useState("");
   const [quantity, setQuantity] = useState("");
   const [price, setPrice] = useState("");
+  const [phone, setPhone] = useState(""); // NEW
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -56,6 +57,7 @@ export default function StockDashboard() {
       !market ||
       !location.trim() ||
       !quality ||
+      !phone.trim() ||
       !Number.isFinite(qty) ||
       !Number.isFinite(pr) ||
       qty <= 0 ||
@@ -75,6 +77,7 @@ export default function StockDashboard() {
         quality,
         quantity: qty,
         price: pr,
+        phone: phone.trim(), // ✅ STORED HERE
         farmerId: user.uid,
         transportStatus: "available",
         createdAt: serverTimestamp(),
@@ -118,30 +121,20 @@ export default function StockDashboard() {
           <form className="stock-form" onSubmit={handleSubmit}>
             <div className="form-row">
               <label>Vegetable</label>
-              <select
-                value={vegetable}
-                onChange={(e) => setVegetable(e.target.value)}
-              >
+              <select value={vegetable} onChange={(e) => setVegetable(e.target.value)}>
                 <option value="">Select vegetable</option>
                 {VEGETABLES.map((v) => (
-                  <option key={v} value={v}>
-                    {v}
-                  </option>
+                  <option key={v} value={v}>{v}</option>
                 ))}
               </select>
             </div>
 
             <div className="form-row">
               <label>Market</label>
-              <select
-                value={market}
-                onChange={(e) => setMarket(e.target.value)}
-              >
+              <select value={market} onChange={(e) => setMarket(e.target.value)}>
                 <option value="">Select market</option>
                 {MARKETS.map((m) => (
-                  <option key={m} value={m}>
-                    {m}
-                  </option>
+                  <option key={m} value={m}>{m}</option>
                 ))}
               </select>
             </div>
@@ -157,11 +150,18 @@ export default function StockDashboard() {
             </div>
 
             <div className="form-row">
+              <label>Phone Number</label>
+              <input
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="e.g. 0771234567"
+              />
+            </div>
+
+            <div className="form-row">
               <label>Quality</label>
-              <select
-                value={quality}
-                onChange={(e) => setQuality(e.target.value)}
-              >
+              <select value={quality} onChange={(e) => setQuality(e.target.value)}>
                 <option value="">Select quality</option>
                 <option value="good">Good</option>
                 <option value="bad">Bad</option>

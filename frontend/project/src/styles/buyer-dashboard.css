@@ -95,6 +95,9 @@
   padding: 22px;
   border-radius: 22px;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: visible;
 }
 
 .stock-card::before {
@@ -110,14 +113,84 @@
   pointer-events: none;
 }
 
+/* IMAGE */
+
+.stock-image img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  display: block;
+}
+
+/* BODY */
+
+.stock-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 14px;
+  flex: 1; /* IMPORTANT */
+}
+
+/* HEADER — FIX ALIGNMENT */
+
+.stock-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  min-height: 48px; /* reserves space */
+}
+
+.stock-card-header h3 {
+  font-size: 1rem;
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* max 2 lines */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 .stock-price {
   font-weight: 800;
   color: #22c55e;
+  white-space: nowrap;
 }
 
 .stock-meta {
   font-size: 14px;
   opacity: 0.85;
+}
+
+/* ================= ACTIONS ================= */
+
+.stock-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: auto; /* locks button to bottom */
+}
+
+.stock-actions .btn {
+  width: 100%;
+}
+
+/* ================= BUTTONS ================= */
+
+.btn {
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn.primary {
+  background: #2e7d32;
+  color: #fff;
+}
+
+.btn.secondary {
+  background: #eeeeee;
+  color: #222;
 }
 
 /* ================= EMPTY ================= */
@@ -126,6 +199,32 @@
   padding: 24px 0;
   text-align: center;
   opacity: 0.75;
+}
+
+/* ================= MODAL ================= */
+
+.buyer-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.buyer-modal {
+  background: #fff;
+  padding: 24px;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 420px;
+  color: #111; /* FIX: force dark text */
+}
+
+.buyer-modal h3,
+.buyer-modal p {
+  color: #111;
 }
 
 /* ================= MOBILE ================= */

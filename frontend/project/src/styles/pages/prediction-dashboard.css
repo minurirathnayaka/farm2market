@@ -204,3 +204,27 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ================= BIG PRICE KPI ================= */
+
+.price-kpi {
+  text-align: center;
+  margin-bottom: 18px;
+}
+
+.price-label {
+  font-size: 14px;
+  opacity: 0.7;
+}
+
+.price-value {
+  font-size: 48px;
+  font-weight: 800;
+  color: #4ade80;
+  line-height: 1.1;
+}
+
+.price-range {
+  font-size: 13px;
+  opacity: 0.65;
+}

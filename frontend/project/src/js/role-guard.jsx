@@ -5,7 +5,7 @@ export default function RoleGuard({ allow, children }) {
   const { role, loading, user } = useAuth();
 
   // Still resolving auth / role
-  if (loading) return null;
+  if (loading || !role) return null;
 
   // Not logged in
   if (!user) {
@@ -22,7 +22,6 @@ export default function RoleGuard({ allow, children }) {
       return <Navigate to="/dashboard/transporter" replace />;
     }
 
-    // buyer fallback
     return <Navigate to="/dashboard" replace />;
   }
 

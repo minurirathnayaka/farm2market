@@ -206,10 +206,21 @@
   color: white;
   outline: none;
   appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
 }
 
 .input-wrapper select:focus + label,
-.input-wrapper select:not([value=""]) + label {
+.input-wrapper select:valid + label {
   transform: translateY(-8px) scale(0.85);
-  color: #000000;
+  color: #06b6d4;
+}
+
+.input-wrapper select:invalid {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.input-wrapper select option {
+  color: #111;
+  background: #fff;
 }

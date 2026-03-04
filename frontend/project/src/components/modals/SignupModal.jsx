@@ -48,6 +48,11 @@ function firebaseErrorMessage(err) {
 export default function SignupModal({ onClose, onLogin }) {
   const [loading, setLoading] = useState(false);
 
+  // This is where signup happens. We break it into 3 parts:
+  // 1) AUTH - create user in Firebase Auth (no retry, critical)
+  // 2) PROFILE - update display name (non-critical, best effort)
+  // 3) FIRESTORE - create user doc (retry safe, critical for app functionality)
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (loading) return;
@@ -172,8 +177,10 @@ export default function SignupModal({ onClose, onLogin }) {
 
             <div className="form-group">
               <div className="input-wrapper">
-                <select name="role" required>
-                  <option value=""></option>
+                <select name="role" defaultValue="" required>
+                  <option value="" disabled>
+                    Select role
+                  </option>
                   <option value="farmer">Farmer</option>
                   <option value="buyer">Buyer</option>
                   <option value="transporter">Transporter</option>

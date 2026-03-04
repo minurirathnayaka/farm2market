@@ -31,6 +31,11 @@ const ALLOWED_PHOTO_TYPES = new Set([
 ]);
 
 const sanitizeFileName = (name) => name.replace(/[^a-zA-Z0-9._-]/g, "_");
+const splitFileName = (name) => {
+  const idx = name.lastIndexOf(".");
+  if (idx <= 0) return { base: name, ext: "jpg" };
+  return { base: name.slice(0, idx), ext: name.slice(idx + 1) || "jpg" };
+};
 
 export default function StockDashboard() {
   const { user } = useAuth();
@@ -105,8 +110,8 @@ export default function StockDashboard() {
 
     const uploadedUrls = [];
     for (const [index, file] of photoFiles.entries()) {
-      const ext = file.name.split(".").pop() || "jpg";
-      const filePath = `stock_photos/${user.uid}/${Date.now()}-${index}-${sanitizeFileName(file.name)}.${ext}`;
+      const { base, ext } = splitFileName(file.name);
+      const filePath = `stock_photos/${user.uid}/${Date.now()}-${index}-${sanitizeFileName(base)}.${ext}`;
       const storageRef = ref(storage, filePath);
 
       const snapshot = await uploadBytes(storageRef, file, {

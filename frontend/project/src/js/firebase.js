@@ -1,21 +1,17 @@
 import { initializeApp, getApps } from "firebase/app";
 import { getAuth, setPersistence, browserLocalPersistence } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
+import { APP_ENV } from "./env";
 
-/**
- * Firebase frontend config
- * Keys are NOT secrets, but must be env-driven for safety.
- */
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  apiKey: APP_ENV.FIREBASE_API_KEY,
+  authDomain: APP_ENV.FIREBASE_AUTH_DOMAIN,
+  projectId: APP_ENV.FIREBASE_PROJECT_ID,
+  storageBucket: APP_ENV.FIREBASE_STORAGE_BUCKET,
+  appId: APP_ENV.FIREBASE_APP_ID,
 };
 
-/**
- * Prevent double initialization in edge cases
- */
 const app =
   getApps().length === 0
     ? initializeApp(firebaseConfig)
@@ -23,12 +19,9 @@ const app =
 
 export const auth = getAuth(app);
 
-/**
- * Explicit auth persistence
- * Ensures consistent login behavior
- */
 setPersistence(auth, browserLocalPersistence).catch(() => {
-  // Fallback silently – never block app
+  // Do not block app startup if persistence fails.
 });
 
 export const db = getFirestore(app);
+export const storage = getStorage(app);

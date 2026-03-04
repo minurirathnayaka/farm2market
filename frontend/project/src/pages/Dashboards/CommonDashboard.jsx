@@ -68,6 +68,23 @@ const VEG_IMAGE_MAP = {
 const getVegImage = (veg) =>
   VEG_IMAGE_MAP[veg] || defaultImg;
 
+const getStockImage = (stock) =>
+  stock?.photoUrl ||
+  (Array.isArray(stock?.photoUrls) ? stock.photoUrls[0] : null) ||
+  getVegImage(stock?.vegetable);
+
+const toValidNonNegativeNumber = (value) => {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return null;
+  return Math.max(0, numeric);
+};
+
+const formatPrice = (value) => {
+  const numeric = toValidNonNegativeNumber(value);
+  if (numeric === null) return "N/A";
+  return numeric.toLocaleString();
+};
+
 export default function CommonDashboard() {
   const navigate = useNavigate();
 
@@ -101,11 +118,18 @@ export default function CommonDashboard() {
         (selectedMarket === "All" || s.market === selectedMarket)
     );
 
-    if (!filtered.length) return { labels: [], datasets: [] };
+    const points = filtered
+      .map((stock, index) => ({
+        label: `#${index + 1}`,
+        price: toValidNonNegativeNumber(stock.price),
+      }))
+      .filter((entry) => entry.price !== null);
+
+    if (!points.length) return { labels: [], datasets: [] };
 
     return {
-      labels: filtered.map((_, i) => `#${i + 1}`),
-      datasets: [{ data: filtered.map((s) => s.price), tension: 0.35 }],
+      labels: points.map((entry) => entry.label),
+      datasets: [{ data: points.map((entry) => entry.price), tension: 0.35 }],
     };
   }, [stocks, selectedVeg, selectedMarket]);
 
@@ -182,13 +206,13 @@ export default function CommonDashboard() {
           stocks.map((s) => (
             <div key={s.id} className="stock-card liquid-glass">
               <div className="stock-image">
-                <img src={getVegImage(s.vegetable)} alt={s.vegetable} />
+                <img src={getStockImage(s)} alt={s.vegetable} />
               </div>
 
               <div className="stock-card-body">
                 <div className="stock-card-header">
                   <h3>{s.vegetable}</h3>
-                  <span className="stock-price">Rs. {s.price}/kg</span>
+                  <span className="stock-price">Rs. {formatPrice(s.price)}/kg</span>
                 </div>
 
                 <div className="stock-meta">

@@ -118,6 +118,26 @@
   color: #6b7280;
 }
 
+.photo-help {
+  font-size: 12px;
+  opacity: 0.75;
+}
+
+.photo-preview-grid {
+  margin-top: 8px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.photo-preview-item {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
 .form-error {
   color: #ef4444;
   font-size: 14px;

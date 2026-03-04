@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
-import { db } from "../../../js/firebase";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { db, storage } from "../../../js/firebase";
 import { useAuth } from "../../../state/authStore";
 import { useNavigate } from "react-router-dom";
 
@@ -20,6 +21,16 @@ const VEGETABLES = [
 ];
 
 const MARKETS = ["Pettah", "Narahenpita"];
+const MAX_PHOTOS = 3;
+const MAX_PHOTO_SIZE_BYTES = 5 * 1024 * 1024;
+const ALLOWED_PHOTO_TYPES = new Set([
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/webp",
+]);
+
+const sanitizeFileName = (name) => name.replace(/[^a-zA-Z0-9._-]/g, "_");
 
 export default function StockDashboard() {
   const { user } = useAuth();
@@ -31,9 +42,22 @@ export default function StockDashboard() {
   const [quality, setQuality] = useState("");
   const [quantity, setQuantity] = useState("");
   const [price, setPrice] = useState("");
-  const [phone, setPhone] = useState(""); // NEW
+  const [phone, setPhone] = useState("");
+
+  const [photoFiles, setPhotoFiles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const photoPreviewUrls = useMemo(
+    () => photoFiles.map((file) => URL.createObjectURL(file)),
+    [photoFiles]
+  );
+
+  useEffect(() => {
+    return () => {
+      photoPreviewUrls.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [photoPreviewUrls]);
 
   if (!user) {
     return (
@@ -43,8 +67,60 @@ export default function StockDashboard() {
     );
   }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handlePhotoChange = (event) => {
+    const files = Array.from(event.target.files || []);
+    if (files.length === 0) {
+      setPhotoFiles([]);
+      return;
+    }
+
+    if (files.length > MAX_PHOTOS) {
+      setError(`You can upload up to ${MAX_PHOTOS} photos.`);
+      event.target.value = "";
+      return;
+    }
+
+    const invalidType = files.find((file) => !ALLOWED_PHOTO_TYPES.has(file.type));
+    if (invalidType) {
+      setError("Only JPG, PNG, and WEBP photos are allowed.");
+      event.target.value = "";
+      return;
+    }
+
+    const oversize = files.find((file) => file.size > MAX_PHOTO_SIZE_BYTES);
+    if (oversize) {
+      setError("Each photo must be 5MB or smaller.");
+      event.target.value = "";
+      return;
+    }
+
+    setError("");
+    setPhotoFiles(files);
+  };
+
+  const uploadStockPhotos = async () => {
+    if (photoFiles.length === 0) {
+      return [];
+    }
+
+    const uploadedUrls = [];
+    for (const [index, file] of photoFiles.entries()) {
+      const ext = file.name.split(".").pop() || "jpg";
+      const filePath = `stock_photos/${user.uid}/${Date.now()}-${index}-${sanitizeFileName(file.name)}.${ext}`;
+      const storageRef = ref(storage, filePath);
+
+      const snapshot = await uploadBytes(storageRef, file, {
+        contentType: file.type,
+      });
+      const downloadUrl = await getDownloadURL(snapshot.ref);
+      uploadedUrls.push(downloadUrl);
+    }
+
+    return uploadedUrls;
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
     if (loading) return;
 
     setError("");
@@ -70,6 +146,8 @@ export default function StockDashboard() {
     try {
       setLoading(true);
 
+      const photoUrls = await uploadStockPhotos();
+
       const stockRef = await addDoc(collection(db, "stocks"), {
         vegetable,
         market,
@@ -77,7 +155,9 @@ export default function StockDashboard() {
         quality,
         quantity: qty,
         price: pr,
-        phone: phone.trim(), // ✅ STORED HERE
+        phone: phone.trim(),
+        photoUrls,
+        photoUrl: photoUrls[0] || null,
         farmerId: user.uid,
         transportStatus: "available",
         createdAt: serverTimestamp(),
@@ -160,6 +240,30 @@ export default function StockDashboard() {
             </div>
 
             <div className="form-row">
+              <label>Stock Photos (optional, up to 3)</label>
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                multiple
+                onChange={handlePhotoChange}
+              />
+              <small className="photo-help">JPG/PNG/WEBP, max 5MB each</small>
+
+              {photoPreviewUrls.length > 0 && (
+                <div className="photo-preview-grid">
+                  {photoPreviewUrls.map((url, index) => (
+                    <img
+                      key={`${url}-${index}`}
+                      src={url}
+                      alt={`Stock preview ${index + 1}`}
+                      className="photo-preview-item"
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="form-row">
               <label>Quality</label>
               <select value={quality} onChange={(e) => setQuality(e.target.value)}>
                 <option value="">Select quality</option>
@@ -191,7 +295,7 @@ export default function StockDashboard() {
             {error && <p className="form-error">{error}</p>}
 
             <button className="btn" type="submit" disabled={loading}>
-              {loading ? "Submitting…" : "Submit Stock"}
+              {loading ? "Submitting..." : "Submit Stock"}
             </button>
           </form>
         </div>
@@ -199,6 +303,7 @@ export default function StockDashboard() {
         <div className="stock-info liquid-glass">
           <h3>Posting Tips</h3>
           <ul>
+            <li><strong>Photos:</strong> Clear images increase buyer trust.</li>
             <li><strong>Pricing:</strong> Competitive prices sell faster.</li>
             <li><strong>Quality:</strong> Be honest to avoid disputes.</li>
             <li><strong>Pickup:</strong> Clear locations reduce delays.</li>

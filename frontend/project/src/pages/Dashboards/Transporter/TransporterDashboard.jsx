@@ -100,7 +100,7 @@ export default function TransporterDashboard() {
 
   /* ================= LOAD ORDER CONTACT CONTEXT ================= */
   useEffect(() => {
-    if (!APP_ENV.FEATURE_ORDER_THREADS || !activeJob?.orderId) {
+    if (!activeJob?.orderId) {
       setActiveOrder(null);
       setBuyerProfile(null);
       setFarmerProfile(null);
@@ -153,7 +153,7 @@ export default function TransporterDashboard() {
   const updateStatus = async (status) => {
     if (!activeJob) return;
 
-    if (APP_ENV.FEATURE_ORDER_THREADS && activeJob.orderId) {
+    if (activeJob.orderId) {
       const mappedStatus = status === "accepted" ? "resumed" : status;
       try {
         setWorking(true);
@@ -214,11 +214,11 @@ export default function TransporterDashboard() {
     });
   };
 
-  const acceptJob = async (jobId) => {
-    if (APP_ENV.FEATURE_ORDER_THREADS) {
+  const acceptJob = async (job) => {
+    if (job?.orderId) {
       try {
         setWorking(true);
-        await claimTransportRequest({ transportRequestId: jobId });
+        await claimTransportRequest({ transportRequestId: job.id });
       } catch (err) {
         toast.error(toFirebaseCallableMessage(err, "Unable to claim job"));
       } finally {
@@ -229,7 +229,7 @@ export default function TransporterDashboard() {
 
     try {
       setWorking(true);
-      await acceptJobLegacy(jobId);
+      await acceptJobLegacy(job.id);
     } catch {
       toast.error("Unable to accept job");
     } finally {
@@ -253,7 +253,7 @@ export default function TransporterDashboard() {
   const completeJob = async () => {
     if (!activeJob) return;
 
-    if (APP_ENV.FEATURE_ORDER_THREADS && activeJob.orderId) {
+    if (activeJob.orderId) {
       await updateStatus("completed");
       return;
     }
@@ -285,7 +285,7 @@ export default function TransporterDashboard() {
   const cancelJob = async () => {
     if (!activeJob) return;
 
-    if (APP_ENV.FEATURE_ORDER_THREADS && activeJob.orderId) {
+    if (activeJob.orderId) {
       await updateStatus("cancelled");
       return;
     }
@@ -381,7 +381,7 @@ export default function TransporterDashboard() {
                   </button>
                 )}
 
-                {APP_ENV.FEATURE_ORDER_THREADS && activeJob.orderId && (
+                {activeJob.orderId && (
                   <button
                     className="btn"
                     disabled={working}
@@ -406,7 +406,7 @@ export default function TransporterDashboard() {
                   Contact
                 </button>
 
-                {APP_ENV.FEATURE_ORDER_THREADS && activeJob.orderId && (
+                {activeJob.orderId && (
                   <button
                     className="btn"
                     onClick={() => navigate(`/dashboard/orders/${activeJob.orderId}`)}
@@ -447,7 +447,7 @@ export default function TransporterDashboard() {
                     <button
                       className="btn"
                       disabled={working}
-                      onClick={() => acceptJob(job.id)}
+                      onClick={() => acceptJob(job)}
                     >
                       Accept Transport
                     </button>
@@ -495,7 +495,7 @@ export default function TransporterDashboard() {
             onClick={(e) => e.stopPropagation()}
           >
             <h3>Contact Details</h3>
-            {APP_ENV.FEATURE_ORDER_THREADS && activeJob?.orderId ? (
+            {activeJob?.orderId ? (
               <>
                 <p>
                   <strong>Farmer:</strong>{" "}

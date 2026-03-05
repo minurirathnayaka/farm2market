@@ -61,5 +61,5 @@ export const APP_ENV = {
     readEnv("VITE_FIREBASE_STORAGE_BUCKET") ||
     `${readEnv("VITE_FIREBASE_PROJECT_ID")}.appspot.com`,
   FIREBASE_FUNCTIONS_REGION: readEnv("VITE_FIREBASE_FUNCTIONS_REGION") || "asia-south1",
-  FEATURE_ORDER_THREADS: readBooleanEnv("VITE_FEATURE_ORDER_THREADS", false),
+  FEATURE_ORDER_THREADS: readBooleanEnv("VITE_FEATURE_ORDER_THREADS", true),
 };

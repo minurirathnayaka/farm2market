@@ -129,14 +129,79 @@ export default function CommonDashboard() {
 
     return {
       labels: points.map((entry) => entry.label),
-      datasets: [{ data: points.map((entry) => entry.price), tension: 0.35 }],
+      datasets: [
+        {
+          label: "Price (Rs./kg)",
+          data: points.map((entry) => entry.price),
+          tension: 0.35,
+          borderColor: "#38bdf8",
+          borderWidth: 3,
+          fill: true,
+          backgroundColor: "rgba(56, 189, 248, 0.14)",
+          pointBackgroundColor: "#e2f3ff",
+          pointBorderColor: "#38bdf8",
+          pointBorderWidth: 1.5,
+          pointRadius: 2,
+          pointHoverRadius: 5,
+          pointHitRadius: 14,
+        },
+      ],
     };
   }, [stocks, selectedVeg, selectedMarket]);
 
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
-    plugins: { legend: { display: false } },
+    interaction: {
+      mode: "index",
+      intersect: false,
+    },
+    elements: {
+      line: {
+        capBezierPoints: true,
+      },
+    },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: "rgba(9, 14, 20, 0.95)",
+        borderColor: "rgba(148, 163, 184, 0.35)",
+        borderWidth: 1,
+        titleColor: "#f8fafc",
+        bodyColor: "#e2e8f0",
+        callbacks: {
+          label: (context) => `Rs. ${context.parsed.y}/kg`,
+        },
+      },
+    },
+    scales: {
+      x: {
+        ticks: {
+          color: "rgba(255, 255, 255, 0.82)",
+          maxRotation: 0,
+          autoSkip: true,
+          maxTicksLimit: 12,
+        },
+        grid: {
+          color: "rgba(255, 255, 255, 0.08)",
+        },
+        border: {
+          color: "rgba(255, 255, 255, 0.15)",
+        },
+      },
+      y: {
+        ticks: {
+          color: "rgba(255, 255, 255, 0.86)",
+          callback: (value) => `Rs. ${value}`,
+        },
+        grid: {
+          color: "rgba(255, 255, 255, 0.12)",
+        },
+        border: {
+          color: "rgba(255, 255, 255, 0.15)",
+        },
+      },
+    },
   };
 
   return (

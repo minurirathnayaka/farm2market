@@ -107,11 +107,16 @@
 .form-row select {
   padding: 12px 14px;
   border-radius: 10px;
-  border: none;
+  border: 1px solid rgba(255, 255, 255, 0.25);
   outline: none;
   color: #000;
   background: rgba(255, 255, 255, 0.9);
   font-size: 14px;
+}
+
+.form-row select option {
+  color: #111;
+  background: #fff;
 }
 
 .form-row input::placeholder {

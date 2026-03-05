@@ -159,6 +159,8 @@ export default function StockDashboard() {
         pickupLocation: location.trim(),
         quality,
         quantity: qty,
+        availableQtyKg: qty,
+        reservedQtyKg: 0,
         price: pr,
         phone: phone.trim(),
         photoUrls,

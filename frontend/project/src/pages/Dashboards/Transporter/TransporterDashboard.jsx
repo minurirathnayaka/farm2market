@@ -1,25 +1,42 @@
 import { useEffect, useState } from "react";
 import {
   collection,
+  doc,
+  getDoc,
+  getDocs,
   onSnapshot,
   query,
-  where,
   runTransaction,
-  doc,
   serverTimestamp,
-  getDocs,
+  where,
 } from "firebase/firestore";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
+
 import { db } from "../../../js/firebase";
 import { useAuth } from "../../../state/authStore";
+import { APP_ENV } from "../../../js/env";
+import {
+  claimTransportRequest,
+  toFirebaseCallableMessage,
+  updateDeliveryStatus,
+} from "../../../js/orderThreadApi";
+import { canRevealPhone, maskPhone } from "../../../js/orders";
+
 import "../../../styles/transporter-dashboard.css";
 
 export default function TransporterDashboard() {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const [openJobs, setOpenJobs] = useState([]);
   const [activeJob, setActiveJob] = useState(null);
   const [completedJobs, setCompletedJobs] = useState([]);
   const [showContact, setShowContact] = useState(false);
+  const [activeOrder, setActiveOrder] = useState(null);
+  const [buyerProfile, setBuyerProfile] = useState(null);
+  const [farmerProfile, setFarmerProfile] = useState(null);
+  const [working, setWorking] = useState(false);
 
   /* ================= ACTIVE JOB ================= */
   useEffect(() => {
@@ -32,11 +49,12 @@ export default function TransporterDashboard() {
     );
 
     return onSnapshot(q, (snap) => {
-      setActiveJob(
-        snap.docs[0]
-          ? { id: snap.docs[0].id, ...snap.docs[0].data() }
-          : null
-      );
+      let rows = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      if (APP_ENV.FEATURE_ORDER_THREADS) {
+        rows = rows.filter((row) => !!row.orderId);
+      }
+
+      setActiveJob(rows[0] || null);
     });
   }, [user]);
 
@@ -53,7 +71,11 @@ export default function TransporterDashboard() {
     );
 
     return onSnapshot(q, (snap) => {
-      setOpenJobs(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+      let rows = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      if (APP_ENV.FEATURE_ORDER_THREADS) {
+        rows = rows.filter((row) => !!row.orderId);
+      }
+      setOpenJobs(rows);
     });
   }, [user, activeJob]);
 
@@ -68,13 +90,56 @@ export default function TransporterDashboard() {
     );
 
     return onSnapshot(q, (snap) => {
-      setCompletedJobs(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+      let rows = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      if (APP_ENV.FEATURE_ORDER_THREADS) {
+        rows = rows.filter((row) => !!row.orderId);
+      }
+      setCompletedJobs(rows);
     });
   }, [user]);
 
+  /* ================= LOAD ORDER CONTACT CONTEXT ================= */
+  useEffect(() => {
+    if (!APP_ENV.FEATURE_ORDER_THREADS || !activeJob?.orderId) {
+      setActiveOrder(null);
+      setBuyerProfile(null);
+      setFarmerProfile(null);
+      return;
+    }
+
+    let active = true;
+
+    (async () => {
+      const orderSnap = await getDoc(doc(db, "orders", activeJob.orderId));
+      if (!orderSnap.exists() || !active) return;
+
+      const order = { id: orderSnap.id, ...orderSnap.data() };
+      setActiveOrder(order);
+
+      const [buyerSnap, farmerSnap] = await Promise.all([
+        order.buyerId ? getDoc(doc(db, "users", order.buyerId)) : Promise.resolve(null),
+        order.farmerId ? getDoc(doc(db, "users", order.farmerId)) : Promise.resolve(null),
+      ]);
+
+      if (!active) return;
+
+      setBuyerProfile(buyerSnap?.exists() ? buyerSnap.data() : null);
+      setFarmerProfile(farmerSnap?.exists() ? farmerSnap.data() : null);
+    })().catch(() => {
+      if (!active) return;
+      setActiveOrder(null);
+      setBuyerProfile(null);
+      setFarmerProfile(null);
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [activeJob?.orderId]);
+
   /* ================= ACTIONS ================= */
 
-  const updateStatus = async (status) => {
+  const updateStatusLegacy = async (status) => {
     if (!activeJob) return;
 
     await runTransaction(db, async (tx) => {
@@ -85,7 +150,36 @@ export default function TransporterDashboard() {
     });
   };
 
-  const acceptJob = async (jobId) => {
+  const updateStatus = async (status) => {
+    if (!activeJob) return;
+
+    if (APP_ENV.FEATURE_ORDER_THREADS && activeJob.orderId) {
+      const mappedStatus = status === "accepted" ? "resumed" : status;
+      try {
+        setWorking(true);
+        await updateDeliveryStatus({
+          transportRequestId: activeJob.id,
+          status: mappedStatus,
+        });
+      } catch (err) {
+        toast.error(toFirebaseCallableMessage(err, "Unable to update status"));
+      } finally {
+        setWorking(false);
+      }
+      return;
+    }
+
+    try {
+      setWorking(true);
+      await updateStatusLegacy(status);
+    } catch {
+      toast.error("Unable to update status");
+    } finally {
+      setWorking(false);
+    }
+  };
+
+  const acceptJobLegacy = async (jobId) => {
     const activeSnap = await getDocs(
       query(
         collection(db, "transport_requests"),
@@ -120,7 +214,30 @@ export default function TransporterDashboard() {
     });
   };
 
-  const completeJob = async () => {
+  const acceptJob = async (jobId) => {
+    if (APP_ENV.FEATURE_ORDER_THREADS) {
+      try {
+        setWorking(true);
+        await claimTransportRequest({ transportRequestId: jobId });
+      } catch (err) {
+        toast.error(toFirebaseCallableMessage(err, "Unable to claim job"));
+      } finally {
+        setWorking(false);
+      }
+      return;
+    }
+
+    try {
+      setWorking(true);
+      await acceptJobLegacy(jobId);
+    } catch {
+      toast.error("Unable to accept job");
+    } finally {
+      setWorking(false);
+    }
+  };
+
+  const completeJobLegacy = async () => {
     await runTransaction(db, async (tx) => {
       tx.update(doc(db, "transport_requests", activeJob.id), {
         status: "completed",
@@ -133,7 +250,25 @@ export default function TransporterDashboard() {
     });
   };
 
-  const cancelJob = async () => {
+  const completeJob = async () => {
+    if (!activeJob) return;
+
+    if (APP_ENV.FEATURE_ORDER_THREADS && activeJob.orderId) {
+      await updateStatus("completed");
+      return;
+    }
+
+    try {
+      setWorking(true);
+      await completeJobLegacy();
+    } catch {
+      toast.error("Unable to complete job");
+    } finally {
+      setWorking(false);
+    }
+  };
+
+  const cancelJobLegacy = async () => {
     await runTransaction(db, async (tx) => {
       tx.update(doc(db, "transport_requests", activeJob.id), {
         status: "open",
@@ -147,9 +282,29 @@ export default function TransporterDashboard() {
     });
   };
 
+  const cancelJob = async () => {
+    if (!activeJob) return;
+
+    if (APP_ENV.FEATURE_ORDER_THREADS && activeJob.orderId) {
+      await updateStatus("cancelled");
+      return;
+    }
+
+    try {
+      setWorking(true);
+      await cancelJobLegacy();
+    } catch {
+      toast.error("Unable to cancel job");
+    } finally {
+      setWorking(false);
+    }
+  };
+
   const mapUrl = `https://maps.google.com/maps?q=${encodeURIComponent(
     activeJob?.pickupLocation || "Sri Lanka"
   )}&z=10&output=embed`;
+
+  const showPhone = canRevealPhone(activeOrder?.status || "requested");
 
   return (
     <div className="dashboard-container transporter-dashboard">
@@ -199,11 +354,17 @@ export default function TransporterDashboard() {
               <p>
                 <strong>Market:</strong> {activeJob.market}
               </p>
+              {activeJob.requestedQtyKg && (
+                <p>
+                  <strong>Qty:</strong> {activeJob.requestedQtyKg} kg
+                </p>
+              )}
 
               <div className="action-row">
                 {activeJob.status === "accepted" && (
                   <button
                     className="btn blue"
+                    disabled={working}
                     onClick={() => updateStatus("paused")}
                   >
                     Pause
@@ -213,17 +374,28 @@ export default function TransporterDashboard() {
                 {activeJob.status === "paused" && (
                   <button
                     className="btn blue"
+                    disabled={working}
                     onClick={() => updateStatus("accepted")}
                   >
                     Resume
                   </button>
                 )}
 
-                <button className="btn green" onClick={completeJob}>
+                {APP_ENV.FEATURE_ORDER_THREADS && activeJob.orderId && (
+                  <button
+                    className="btn"
+                    disabled={working}
+                    onClick={() => updateStatus("picked_up")}
+                  >
+                    Mark Picked Up
+                  </button>
+                )}
+
+                <button className="btn green" disabled={working} onClick={completeJob}>
                   Finish Delivery
                 </button>
 
-                <button className="btn red" onClick={cancelJob}>
+                <button className="btn red" disabled={working} onClick={cancelJob}>
                   Cancel
                 </button>
 
@@ -231,8 +403,17 @@ export default function TransporterDashboard() {
                   className="btn white"
                   onClick={() => setShowContact(true)}
                 >
-                  Contact Farmer
+                  Contact
                 </button>
+
+                {APP_ENV.FEATURE_ORDER_THREADS && activeJob.orderId && (
+                  <button
+                    className="btn"
+                    onClick={() => navigate(`/dashboard/orders/${activeJob.orderId}`)}
+                  >
+                    Open Thread
+                  </button>
+                )}
               </div>
             </section>
           )}
@@ -257,9 +438,15 @@ export default function TransporterDashboard() {
                     <p>
                       <strong>Market:</strong> {job.market}
                     </p>
+                    {job.requestedQtyKg && (
+                      <p>
+                        <strong>Qty:</strong> {job.requestedQtyKg} kg
+                      </p>
+                    )}
 
                     <button
                       className="btn"
+                      disabled={working}
                       onClick={() => acceptJob(job.id)}
                     >
                       Accept Transport
@@ -307,11 +494,40 @@ export default function TransporterDashboard() {
             className="modal"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3>Farmer Contact</h3>
-            <p>
-              <strong>Phone:</strong>{" "}
-              {activeJob.phone || "Not available"}
-            </p>
+            <h3>Contact Details</h3>
+            {APP_ENV.FEATURE_ORDER_THREADS && activeJob?.orderId ? (
+              <>
+                <p>
+                  <strong>Farmer:</strong>{" "}
+                  {farmerProfile
+                    ? `${farmerProfile.firstName || ""} ${farmerProfile.lastName || ""}`.trim() || "Unknown"
+                    : "Unknown"}
+                </p>
+                <p>
+                  <strong>Farmer Phone:</strong>{" "}
+                  {showPhone
+                    ? farmerProfile?.phone || activeJob.phone || "Not available"
+                    : maskPhone(farmerProfile?.phone || activeJob.phone)}
+                </p>
+                <p>
+                  <strong>Buyer:</strong>{" "}
+                  {buyerProfile
+                    ? `${buyerProfile.firstName || ""} ${buyerProfile.lastName || ""}`.trim() || "Unknown"
+                    : "Unknown"}
+                </p>
+                <p>
+                  <strong>Buyer Phone:</strong>{" "}
+                  {showPhone
+                    ? buyerProfile?.phone || "Not available"
+                    : maskPhone(buyerProfile?.phone)}
+                </p>
+              </>
+            ) : (
+              <p>
+                <strong>Phone:</strong>{" "}
+                {activeJob?.phone || "Not available"}
+              </p>
+            )}
             <button className="btn" onClick={() => setShowContact(false)}>
               Close
             </button>

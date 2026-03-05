@@ -1,10 +1,22 @@
 import { useEffect, useState } from "react";
-import { collection, query, where, onSnapshot } from "firebase/firestore";
+import { collection, query, where, onSnapshot, orderBy } from "firebase/firestore";
 import { db } from "../../../js/firebase";
 import { useAuth } from "../../../state/authStore";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { APP_ENV } from "../../../js/env";
+import { respondToOrder, toFirebaseCallableMessage } from "../../../js/orderThreadApi";
+import { toOrderStatusLabel } from "../../../js/orders";
 
 import "../../../styles/farmer-dashboard.css";
+
+const toModelKey = (value) =>
+  (value || "")
+    .toLowerCase()
+    .replace(/[()]/g, "")
+    .replace(/\s+/g, "_")
+    .replace(/_+/g, "_")
+    .replace(/^_+|_+$/g, "");
 
 export default function FarmerDashboard() {
   const { user } = useAuth();
@@ -13,6 +25,8 @@ export default function FarmerDashboard() {
   const [stocks, setStocks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [incomingOrders, setIncomingOrders] = useState([]);
+  const [busyOrderId, setBusyOrderId] = useState("");
 
   /* ================= REALTIME STOCKS ================= */
   useEffect(() => {
@@ -48,6 +62,34 @@ export default function FarmerDashboard() {
     return () => unsub();
   }, [user]);
 
+  useEffect(() => {
+    if (!APP_ENV.FEATURE_ORDER_THREADS || !user) {
+      setIncomingOrders([]);
+      return;
+    }
+
+    const q = query(
+      collection(db, "orders"),
+      where("farmerId", "==", user.uid),
+      where("status", "==", "requested"),
+      orderBy("createdAt", "desc")
+    );
+
+    const unsub = onSnapshot(
+      q,
+      (snap) => {
+        setIncomingOrders(
+          snap.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }))
+        );
+      },
+      () => {
+        setIncomingOrders([]);
+      }
+    );
+
+    return () => unsub();
+  }, [user]);
+
   const totalQuantity = stocks.reduce(
     (sum, s) => sum + Number(s.quantity || 0),
     0
@@ -58,9 +100,21 @@ export default function FarmerDashboard() {
   const goToPrediction = (veg, market) => {
     navigate(
       `/dashboard/predictions?veg=${encodeURIComponent(
-        veg
-      )}&market=${encodeURIComponent(market)}`
+        toModelKey(veg)
+      )}&market=${encodeURIComponent(toModelKey(market))}`
     );
+  };
+
+  const handleOrderResponse = async (orderId, action) => {
+    try {
+      setBusyOrderId(orderId);
+      await respondToOrder({ orderId, action });
+      toast.success(action === "accept" ? "Order accepted" : "Order rejected");
+    } catch (err) {
+      toast.error(toFirebaseCallableMessage(err, "Unable to update order"));
+    } finally {
+      setBusyOrderId("");
+    }
   };
 
   return (
@@ -99,6 +153,68 @@ export default function FarmerDashboard() {
           <p>Markets Covered</p>
         </div>
       </div>
+
+      {APP_ENV.FEATURE_ORDER_THREADS && (
+        <div className="farmer-table-card liquid-glass">
+          <div className="farmer-table-header">
+            <h2>Incoming Order Requests</h2>
+          </div>
+
+          {incomingOrders.length === 0 && (
+            <p className="farmer-empty">No pending order requests.</p>
+          )}
+
+          {incomingOrders.length > 0 && (
+            <div className="farmer-table-wrapper">
+              <table className="farmer-stock-table">
+                <thead>
+                  <tr>
+                    <th>Order</th>
+                    <th>Quantity</th>
+                    <th>Market</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {incomingOrders.map((order) => (
+                    <tr key={order.id}>
+                      <td>{order.id.slice(0, 8).toUpperCase()}</td>
+                      <td>{order.requestedQtyKg || "-"} kg</td>
+                      <td>{order.market || "-"}</td>
+                      <td>{toOrderStatusLabel(order.status)}</td>
+                      <td>
+                        <div className="order-action-group">
+                          <button
+                            className="btn green"
+                            disabled={busyOrderId === order.id}
+                            onClick={() => handleOrderResponse(order.id, "accept")}
+                          >
+                            Accept
+                          </button>
+                          <button
+                            className="btn red"
+                            disabled={busyOrderId === order.id}
+                            onClick={() => handleOrderResponse(order.id, "reject")}
+                          >
+                            Reject
+                          </button>
+                          <button
+                            className="btn"
+                            onClick={() => navigate(`/dashboard/orders/${order.id}`)}
+                          >
+                            Open
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* ================= TABLE ================= */}
       <div className="farmer-table-card liquid-glass">

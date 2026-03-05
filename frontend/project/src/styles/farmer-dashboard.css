@@ -137,6 +137,17 @@
   opacity: 0.75;
 }
 
+.order-action-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.order-action-group .btn {
+  padding: 6px 10px;
+  font-size: 12px;
+}
+
 /* ================= MOBILE ================= */
 
 @media (max-width: 640px) {

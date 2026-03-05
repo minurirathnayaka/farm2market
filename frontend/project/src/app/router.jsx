@@ -39,6 +39,12 @@ const PredictionDashboard = lazy(() =>
 const StockDashboard = lazy(() =>
   import("../pages/Dashboards/Stock/StockDashboard")
 );
+const OrdersDashboard = lazy(() =>
+  import("../pages/Dashboards/Orders/OrdersDashboard")
+);
+const OrderDetailDashboard = lazy(() =>
+  import("../pages/Dashboards/Orders/OrderDetailDashboard")
+);
 
 /* ======================================================
    Shared fallbacks
@@ -158,6 +164,32 @@ const router = createBrowserRouter([
             <RoleGuard allow={["farmer"]}>
               <Suspense fallback={<PageLoader />}>
                 <StockDashboard />
+              </Suspense>
+            </RoleGuard>
+          </AuthGuard>
+        ),
+      },
+
+      /* SHARED ORDERS */
+      {
+        path: "orders",
+        element: (
+          <AuthGuard>
+            <RoleGuard allow={["buyer", "transporter", "farmer"]}>
+              <Suspense fallback={<PageLoader />}>
+                <OrdersDashboard />
+              </Suspense>
+            </RoleGuard>
+          </AuthGuard>
+        ),
+      },
+      {
+        path: "orders/:orderId",
+        element: (
+          <AuthGuard>
+            <RoleGuard allow={["buyer", "transporter", "farmer"]}>
+              <Suspense fallback={<PageLoader />}>
+                <OrderDetailDashboard />
               </Suspense>
             </RoleGuard>
           </AuthGuard>

@@ -1,0 +1,76 @@
+.orders-dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.orders-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.orders-list-card {
+  border-radius: 18px;
+  padding: 22px;
+}
+
+.orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.order-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.order-title {
+  color: #f8fafc;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.order-meta {
+  font-size: 13px;
+  color: rgba(248, 250, 252, 0.88);
+}
+
+.order-time {
+  font-size: 12px;
+  color: rgba(226, 232, 240, 0.75);
+}
+
+.order-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.orders-empty {
+  text-align: center;
+  opacity: 0.78;
+  padding: 20px 0;
+}
+
+@media (max-width: 880px) {
+  .order-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .order-actions {
+    width: 100%;
+  }
+
+  .order-actions .btn {
+    flex: 1;
+  }
+}

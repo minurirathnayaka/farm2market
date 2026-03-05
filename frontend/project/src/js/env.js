@@ -11,6 +11,12 @@ const readEnv = (key) => {
   return typeof value === "string" ? value.trim() : "";
 };
 
+const readBooleanEnv = (key, fallback = false) => {
+  const raw = readEnv(key).toLowerCase();
+  if (!raw) return fallback;
+  return raw === "1" || raw === "true" || raw === "yes" || raw === "on";
+};
+
 const missingVars = REQUIRED_ENV_VARS.filter((key) => !readEnv(key));
 if (missingVars.length > 0) {
   throw new Error(
@@ -54,4 +60,6 @@ export const APP_ENV = {
   FIREBASE_STORAGE_BUCKET:
     readEnv("VITE_FIREBASE_STORAGE_BUCKET") ||
     `${readEnv("VITE_FIREBASE_PROJECT_ID")}.appspot.com`,
+  FIREBASE_FUNCTIONS_REGION: readEnv("VITE_FIREBASE_FUNCTIONS_REGION") || "asia-south1",
+  FEATURE_ORDER_THREADS: readBooleanEnv("VITE_FEATURE_ORDER_THREADS", false),
 };

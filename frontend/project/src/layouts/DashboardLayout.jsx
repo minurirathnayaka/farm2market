@@ -1,5 +1,7 @@
 import { Outlet, NavLink } from "react-router-dom";
 import { useAuth } from "../state/authStore";
+import NotificationInbox from "../components/ui/NotificationInbox";
+import { APP_ENV } from "../js/env";
 
 import "../styles/layout.css";
 
@@ -11,6 +13,7 @@ import "../styles/layout.css";
  */
 export default function DashboardLayout() {
   const { role, loading, user } = useAuth();
+  const dashboardHome = role === "transporter" ? "/dashboard/transporter" : "/dashboard";
 
   if (loading) {
     return (
@@ -26,6 +29,8 @@ export default function DashboardLayout() {
   return (
     <div className="dashboard-shell">
       <aside className="dashboard-sidebar">
+        {APP_ENV.FEATURE_ORDER_THREADS && <NotificationInbox />}
+
         {/* =========================
            Common Dashboard
            buyer + transporter
@@ -33,7 +38,7 @@ export default function DashboardLayout() {
         {(role === "buyer" || role === "transporter") && (
           <>
             <NavLink
-              to="/dashboard"
+              to={dashboardHome}
               end
               className={({ isActive }) =>
                 isActive ? "active" : undefined
@@ -41,6 +46,17 @@ export default function DashboardLayout() {
             >
               Dashboard
             </NavLink>
+
+            {APP_ENV.FEATURE_ORDER_THREADS && (
+              <NavLink
+                to="/dashboard/orders"
+                className={({ isActive }) =>
+                  isActive ? "active" : undefined
+                }
+              >
+                Orders
+              </NavLink>
+            )}
 
             <NavLink
               to="/dashboard/predictions"
@@ -84,6 +100,17 @@ export default function DashboardLayout() {
             >
               Market Predictions
             </NavLink>
+
+            {APP_ENV.FEATURE_ORDER_THREADS && (
+              <NavLink
+                to="/dashboard/orders"
+                className={({ isActive }) =>
+                  isActive ? "active" : undefined
+                }
+              >
+                Orders
+              </NavLink>
+            )}
           </>
         )}
 

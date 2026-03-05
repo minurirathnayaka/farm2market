@@ -108,6 +108,10 @@ export default function SignupModal({ onClose, onLogin }) {
           email: user.email,
           phone,
           role,
+          avatarUrl: "",
+          avgResponseMin: role === "farmer" ? 10 : role === "transporter" ? 12 : 8,
+          completedDeliveries: 0,
+          lastSeenAt: serverTimestamp(),
           createdAt: serverTimestamp(),
         })
       );

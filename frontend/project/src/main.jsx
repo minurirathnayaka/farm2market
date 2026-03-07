@@ -6,7 +6,6 @@ import { Toaster } from "sonner";
 import router from "./app/router.jsx";
 import { AuthProvider } from "./state/authStore.jsx";
 import AccountSetupGate from "./components/ui/AccountSetupGate.jsx";
-import Chatbot from "./components/ai/Chatbot.jsx";
 import "./styles/account-setup.css";
 
 
@@ -35,9 +34,6 @@ ReactDOM.createRoot(rootElement).render(
       </AccountSetupGate>
 
       <Toaster richColors position="top-right" closeButton duration={4000} />
-
-      {/* GLOBAL CHATBOT */}
-      <Chatbot />
     </AuthProvider>
   </React.StrictMode>
 );

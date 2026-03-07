@@ -1,6 +1,7 @@
 import { Outlet, NavLink } from "react-router-dom";
 import { useAuth } from "../state/authStore";
 import NotificationInbox from "../components/ui/NotificationInbox";
+import Chatbot from "../components/ai/Chatbot";
 import { APP_ENV } from "../js/env";
 
 import "../styles/layout.css";
@@ -127,6 +128,8 @@ export default function DashboardLayout() {
       <main className="dashboard-content">
         <Outlet />
       </main>
+
+      <Chatbot />
     </div>
   );
 }

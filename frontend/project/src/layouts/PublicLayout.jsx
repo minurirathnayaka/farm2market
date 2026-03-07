@@ -14,6 +14,7 @@ import Logo from "../components/ui/Logo";
 import PublicNav from "../components/ui/PublicNav";
 import Avatar from "../components/ui/Avatar";
 import ProfileDropdown from "../components/ui/ProfileDropdown";
+import Chatbot from "../components/ai/Chatbot";
 
 export default function PublicLayout() {
   const [authModal, setAuthModal] = useState(null);
@@ -94,6 +95,8 @@ export default function PublicLayout() {
           onLogin={() => setAuthModal("login")}
         />
       )}
+
+      <Chatbot />
     </>
   );
 }

@@ -3,23 +3,46 @@ import { APP_ENV } from "./env";
 const DEFAULT_TIMEOUT_MS = 12000;
 const RETRYABLE_STATUS = new Set([408, 429, 500, 502, 503, 504]);
 const CHAT_RESPONSE_GUIDELINES =
-  "Reply briefly (max 5 short sentences). No markdown headings, no bold/italic markers, no bullet stars. Use plain text only.";
+  "Reply in one short paragraph (max 80 words). Use plain text only. No markdown, no lists, no headings, no bold/italic markers.";
+
+function trimLikelyTruncatedTail(text) {
+  const lines = text.split("\n");
+  if (lines.length < 2) return text.trim();
+
+  const lastLine = (lines[lines.length - 1] || "").trim();
+  const isShortBullet = /^[•▪▫◦‣-]\s+/.test(lastLine) && lastLine.split(/\s+/).length <= 4;
+  const hasMarkdownNoise = /[*_`#]/.test(lastLine);
+  const looksIncomplete = !/[.!?]"?$/.test(lastLine);
+
+  if (isShortBullet && (hasMarkdownNoise || looksIncomplete)) {
+    lines.pop();
+    return lines.join("\n").trim();
+  }
+
+  return text.trim();
+}
 
 function normalizeChatReply(text) {
   if (typeof text !== "string") return "";
 
-  return text
+  const cleaned = text
     .replace(/\r\n?/g, "\n")
     .replace(/^\s{0,3}#{1,6}\s+/gm, "")
     .replace(/^\s*[-*+]\s+/gm, "• ")
+    .replace(/^\s*[▪▫◦‣]\s+/gm, "• ")
     .replace(/^\s*\d+\.\s+/gm, "• ")
+    .replace(/^(\s*•\s+)\*{1,3}(?=\S)/gm, "$1")
+    .replace(/^\s*\*{1,3}(?=\S)/gm, "")
     .replace(/\*\*(.*?)\*\*/g, "$1")
     .replace(/__(.*?)__/g, "$1")
     .replace(/(^|\s)\*(\S(?:.*?\S)?)\*(?=\s|$)/g, "$1$2")
     .replace(/(^|\s)_(\S(?:.*?\S)?)_(?=\s|$)/g, "$1$2")
     .replace(/`{1,3}([^`]+)`{1,3}/g, "$1")
+    .replace(/[*_`#]+\s*$/gm, "")
     .replace(/\n{3,}/g, "\n\n")
     .trim();
+
+  return trimLikelyTruncatedTail(cleaned);
 }
 
 export class ApiError extends Error {

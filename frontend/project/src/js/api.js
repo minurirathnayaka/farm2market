@@ -1,61 +1,216 @@
-const API_BASE =
-  import.meta.env.VITE_API_BASE_URL ||
-  "http://18.139.192.254"; // fallback EC2 IP
+import { APP_ENV } from "./env";
 
-const DEFAULT_TIMEOUT = 10000; // 10s
-const DEFAULT_RETRIES = 2;
+const DEFAULT_TIMEOUT_MS = 12000;
+const RETRYABLE_STATUS = new Set([408, 429, 500, 502, 503, 504]);
+const CHAT_RESPONSE_GUIDELINES =
+  "Reply briefly (max 5 short sentences). No markdown headings, no bold/italic markers, no bullet stars. Use plain text only.";
 
-/**
- * Core fetch wrapper with:
- * - timeout
- * - retries
- * - safe JSON parsing
- */
-async function request(path, options = {}, retries = DEFAULT_RETRIES) {
-  const controller = new AbortController();
-  const id = setTimeout(() => controller.abort(), DEFAULT_TIMEOUT);
+function normalizeChatReply(text) {
+  if (typeof text !== "string") return "";
 
-  try {
-    const res = await fetch(`${API_BASE}${path}`, {
-      ...options,
-      signal: controller.signal,
-      headers: {
-        "Content-Type": "application/json",
-        ...(options.headers || {}),
-      },
-    });
+  return text
+    .replace(/\r\n?/g, "\n")
+    .replace(/^\s{0,3}#{1,6}\s+/gm, "")
+    .replace(/^\s*[-*+]\s+/gm, "• ")
+    .replace(/^\s*\d+\.\s+/gm, "• ")
+    .replace(/\*\*(.*?)\*\*/g, "$1")
+    .replace(/__(.*?)__/g, "$1")
+    .replace(/(^|\s)\*(\S(?:.*?\S)?)\*(?=\s|$)/g, "$1$2")
+    .replace(/(^|\s)_(\S(?:.*?\S)?)_(?=\s|$)/g, "$1$2")
+    .replace(/`{1,3}([^`]+)`{1,3}/g, "$1")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
 
-    if (!res.ok) {
-      const text = await res.text();
-      throw new Error(`API ${res.status}: ${text}`);
-    }
-
-    return await res.json();
-  } catch (err) {
-    if (retries > 0) {
-      return request(path, options, retries - 1);
-    }
-    throw err;
-  } finally {
-    clearTimeout(id);
+export class ApiError extends Error {
+  constructor(message, { status = null, code = null, details = null } = {}) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+    this.code = code;
+    this.details = details;
   }
 }
 
-/* =========================
-   API METHODS
-========================= */
+const joinUrl = (base, path = "") => {
+  if (!path) return base;
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  return `${base}${normalizedPath}`;
+};
 
-export function fetchModels() {
-  return request("/models");
+const parseJsonSafe = async (response) => {
+  const text = await response.text();
+  if (!text) return null;
+
+  try {
+    return JSON.parse(text);
+  } catch {
+    return { raw: text };
+  }
+};
+
+const unwrapPayload = (payload, fallbackStatus = null) => {
+  if (!payload || typeof payload !== "object") {
+    return payload;
+  }
+
+  if (payload.success === true) {
+    return payload.data;
+  }
+
+  if (payload.success === false) {
+    const error = payload.error || {};
+    throw new ApiError(error.message || "Request failed", {
+      status: fallbackStatus,
+      code: error.code || null,
+      details: error.details ?? payload,
+    });
+  }
+
+  return payload;
+};
+
+const toApiError = (error, fallbackMessage) => {
+  if (error instanceof ApiError) {
+    return error;
+  }
+
+  if (error?.name === "AbortError") {
+    return new ApiError("Request timed out. Please try again.");
+  }
+
+  return new ApiError(fallbackMessage, { details: error?.message || null });
+};
+
+export async function request(
+  path,
+  {
+    method = "GET",
+    body,
+    headers = {},
+    signal,
+    timeoutMs = DEFAULT_TIMEOUT_MS,
+    retries = 0,
+    baseUrl = APP_ENV.API_BASE_URL,
+  } = {}
+) {
+  const url = joinUrl(baseUrl, path);
+
+  let attempt = 0;
+  while (attempt <= retries) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+    const abortHandler = () => controller.abort();
+    if (signal) {
+      if (signal.aborted) {
+        clearTimeout(timeoutId);
+        throw new ApiError("Request cancelled by user");
+      }
+      signal.addEventListener("abort", abortHandler, { once: true });
+    }
+
+    try {
+      const response = await fetch(url, {
+        method,
+        signal: controller.signal,
+        headers: {
+          "Content-Type": "application/json",
+          ...headers,
+        },
+        ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
+      });
+
+      const payload = await parseJsonSafe(response);
+
+      if (!response.ok) {
+        const message =
+          payload?.error?.message ||
+          payload?.detail ||
+          payload?.raw ||
+          `API request failed (${response.status})`;
+
+        if (attempt < retries && RETRYABLE_STATUS.has(response.status)) {
+          attempt += 1;
+          continue;
+        }
+
+        throw new ApiError(message, {
+          status: response.status,
+          code: payload?.error?.code || null,
+          details: payload,
+        });
+      }
+
+      return unwrapPayload(payload, response.status);
+    } catch (error) {
+      if (error instanceof ApiError) {
+        if (attempt < retries && RETRYABLE_STATUS.has(error.status)) {
+          attempt += 1;
+          continue;
+        }
+        throw error;
+      }
+
+      if (attempt < retries) {
+        attempt += 1;
+        continue;
+      }
+
+      throw toApiError(error, "Unable to reach the server right now.");
+    } finally {
+      clearTimeout(timeoutId);
+      if (signal) {
+        signal.removeEventListener("abort", abortHandler);
+      }
+    }
+  }
+
+  throw new ApiError("Request failed after retries");
 }
 
-export function fetchPrediction({ veg, market, start, end }) {
-  const params = new URLSearchParams({
-    veg,
-    market,
-    start,
-    end,
+export function toUserMessage(error, fallbackMessage) {
+  if (error instanceof ApiError) {
+    return error.message || fallbackMessage;
+  }
+
+  return fallbackMessage;
+}
+
+export async function fetchModels(options = {}) {
+  const data = await request("/models", { retries: 1, ...options });
+
+  if (!data || !Array.isArray(data.models)) {
+    return { count: 0, models: [] };
+  }
+
+  return {
+    count: Number(data.count || data.models.length),
+    models: data.models,
+  };
+}
+
+export function fetchPrediction({ veg, market, start, end }, options = {}) {
+  const params = new URLSearchParams({ veg, market, start, end });
+  return request(`/predict?${params.toString()}`, options);
+}
+
+export async function fetchChatReply(message, options = {}) {
+  const data = await request("", {
+    method: "POST",
+    body: {
+      message,
+      responseStyle: "short",
+      systemInstruction: CHAT_RESPONSE_GUIDELINES,
+    },
+    baseUrl: APP_ENV.CHAT_API_URL,
+    ...options,
   });
 
-  return request(`/predict?${params.toString()}`);
+  if (typeof data?.reply === "string" && data.reply.trim()) {
+    const normalized = normalizeChatReply(data.reply);
+    return normalized || "No response.";
+  }
+
+  return "No response.";
 }

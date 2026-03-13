@@ -28,6 +28,7 @@ export default function PublicLayout() {
 
   const navigate = useNavigate();
   const location = useLocation();
+  const showChatbot = location.pathname !== "/test";
 
   // Pages that use transparent + glass header
   const overlayHeaderPages = ["/", "/about", "/contact", "/profile"];
@@ -95,8 +96,7 @@ export default function PublicLayout() {
           onLogin={() => setAuthModal("login")}
         />
       )}
-
-      <Chatbot />
+      {showChatbot && <Chatbot />}
     </>
   );
 }

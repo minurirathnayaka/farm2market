@@ -20,6 +20,7 @@ import Landing from "../pages/Landing/Landing";
 import About from "../pages/About/About";
 import Contact from "../pages/Contact/Contact";
 import Profile from "../pages/Profile/Profile";
+import TestingExplained from "../pages/TestingExplained/TestingExplained";
 
 /* ======================================================
    Dashboard pages (lazy)
@@ -81,6 +82,7 @@ const router = createBrowserRouter([
       { index: true, element: <Landing /> },
       { path: "about", element: <About /> },
       { path: "contact", element: <Contact /> },
+      { path: "test", element: <TestingExplained /> },
       {
         path: "profile",
         element: (

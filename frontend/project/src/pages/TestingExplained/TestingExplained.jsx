@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import "../../styles/testing-explained.css";
 
@@ -52,6 +52,24 @@ const statusClasses = {
   PASS: "testing-explained__status testing-explained__status--pass",
   FAIL: "testing-explained__status testing-explained__status--fail",
 };
+
+function ExplainMore({ children }) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className={`testing-explained__expand ${isOpen ? "is-open" : ""}`}>
+      <button
+        type="button"
+        className="testing-explained__expand-button"
+        aria-expanded={isOpen}
+        onClick={() => setIsOpen((current) => !current)}
+      >
+        {isOpen ? "Hide extra explanation" : "Explain more"}
+      </button>
+      <div className="testing-explained__expand-content">{children}</div>
+    </div>
+  );
+}
 
 export default function TestingExplained() {
   useEffect(() => {
@@ -118,6 +136,20 @@ export default function TestingExplained() {
             service. Because of that, the project was tested in more than one way. This
             page explains what was checked, how it was checked, and what the results meant.
           </p>
+          <ExplainMore>
+            <p>
+              In very simple terms, this page is the story of how we checked whether the
+              project was working properly.
+            </p>
+            <p>
+              We did not look at only one thing. We checked the price prediction part,
+              the website features, the speed of the system, and the basic safety checks.
+            </p>
+            <p>
+              So this page is here to answer one simple question: what exactly was tested,
+              and what happened when it was tested?
+            </p>
+          </ExplainMore>
         </section>
 
         <section className="testing-explained__section">
@@ -128,6 +160,22 @@ export default function TestingExplained() {
             answers, whether the main website features worked, whether the system stayed fast
             enough in normal use, and whether basic protection checks were in place.
           </p>
+          <ExplainMore>
+            <p>
+              A project can look fine on the surface and still have hidden problems.
+              Testing helps us catch those problems before other people depend on the system.
+            </p>
+            <p>
+              For example, a page might open correctly, but the results might be wrong. Or
+              the results might be correct, but the system might slow down when many people
+              use it at once.
+            </p>
+            <p>
+              So testing was done to answer four simple questions: does it work, does it
+              give sensible results, is it fast enough in normal use, and does it block
+              clearly bad requests?
+            </p>
+          </ExplainMore>
         </section>
 
         <section className="testing-explained__section">
@@ -158,6 +206,20 @@ export default function TestingExplained() {
               </p>
             </article>
           </div>
+          <ExplainMore>
+            <p>
+              Think of the project as four things working together.
+            </p>
+            <p>
+              First, there is the part that tries to guess future prices. Second, there is
+              the website that people use. Third, there is the system speed and stability.
+              Fourth, there are the basic rules that stop clearly wrong or unsafe requests.
+            </p>
+            <p>
+              If only one of these parts is checked, we do not get the full picture. That is
+              why the testing covered all four.
+            </p>
+          </ExplainMore>
         </section>
 
         <section className="testing-explained__section">
@@ -192,6 +254,28 @@ export default function TestingExplained() {
             The saved results showed that some price patterns were easier to predict than others.
             More stable price movements usually gave lower error, while sharper price swings were harder.
           </p>
+          <ExplainMore>
+            <p>
+              Here is the simple version.
+            </p>
+            <p>
+              We used old price records that were already available. Most of those older records
+              were used to teach the model the general pattern.
+            </p>
+            <p>
+              Then we held back the last 90 daily records. This means we did not show those 90
+              days to the model while it was learning. After the model finished learning, we asked
+              it to guess those hidden 90 days.
+            </p>
+            <p>
+              Then we compared the guesses with the real prices from those same 90 days.
+            </p>
+            <p>
+              MAE means the average size of the mistake. RMSE is also about mistake size, but it
+              punishes big misses more. MAPE shows the mistake as a percentage, which makes it easier
+              to compare one vegetable with another.
+            </p>
+          </ExplainMore>
         </section>
 
         <section className="testing-explained__section">
@@ -232,6 +316,25 @@ export default function TestingExplained() {
               </tbody>
             </table>
           </div>
+          <ExplainMore>
+            <p>
+              This comparison asks a fair question: is the main prediction method actually better
+              than very simple guessing methods?
+            </p>
+            <p>
+              The Naive Baseline is the simplest one. It just says, “tomorrow will probably look
+              like the latest real price we already saw.”
+            </p>
+            <p>
+              The 7-day moving average is also simple. It looks at the last seven real prices,
+              adds them together, and uses their average as the next guess.
+            </p>
+            <p>
+              In these saved results, both simple methods beat Prophet on average. That does not
+              mean the project has no value. It means the current forecasting setup still needs more
+              improvement before it can clearly outperform simpler methods.
+            </p>
+          </ExplainMore>
         </section>
 
         <section className="testing-explained__section">
@@ -262,6 +365,23 @@ export default function TestingExplained() {
               </tbody>
             </table>
           </div>
+          <ExplainMore>
+            <p>
+              These examples help show the difference between easier and harder prediction jobs.
+            </p>
+            <p>
+              Big Onion Local in Pettah and Big Onion in Narahenpita were more stable examples,
+              so the model made smaller percentage mistakes there.
+            </p>
+            <p>
+              Lime in Narahenpita and Green Chilli in Pettah were much harder. Their price movement
+              was less stable, so the model made much larger percentage mistakes.
+            </p>
+            <p>
+              So the main lesson is simple: when prices move more calmly, prediction is easier;
+              when prices swing sharply, prediction becomes much harder.
+            </p>
+          </ExplainMore>
         </section>
 
         <section className="testing-explained__section">
@@ -298,6 +418,21 @@ export default function TestingExplained() {
           <p>
             In total, 24 functional tests were executed. Out of these, 23 passed and 1 failed.
           </p>
+          <ExplainMore>
+            <p>
+              This part was about checking whether the important features actually worked when used
+              like a normal person would use them.
+            </p>
+            <p>
+              For example, we checked opening the login form, trying a wrong password, signing in as
+              different user types, going to dashboards, loading the forecast options, and sending a
+              forecast request.
+            </p>
+            <p>
+              The result was strong overall. Out of 24 feature checks, 23 worked as expected.
+              One did not.
+            </p>
+          </ExplainMore>
         </section>
 
         <section className="testing-explained__section">
@@ -334,6 +469,23 @@ export default function TestingExplained() {
             test, the prediction service became unstable. The safety checks passed for the cases
             that were tested.
           </p>
+          <ExplainMore>
+            <p>
+              This part was not about buttons or pages. It was about behavior.
+            </p>
+            <p>
+              Speed testing asked, “does the system answer in a reasonable time when used normally?”
+              The saved results say yes.
+            </p>
+            <p>
+              Load testing asked, “what happens if many requests come in quickly?” In one burst test,
+              the prediction service struggled. Some requests were not successful and some replies were slow.
+            </p>
+            <p>
+              Safety testing asked, “does the system block clearly wrong or unsupported requests?”
+              The saved checks for unsafe input, wrong request types, unsupported models, and origin rules passed.
+            </p>
+          </ExplainMore>
         </section>
 
         <section className="testing-explained__section testing-explained__section--issue">
@@ -344,6 +496,20 @@ export default function TestingExplained() {
             error instead of giving a clearer validation message. This does not mean the whole
             system failed, but it does show that input checking still needs to be improved.
           </p>
+          <ExplainMore>
+            <p>
+              In plain language, this means the system did notice something went wrong, but it did
+              not explain the problem properly.
+            </p>
+            <p>
+              If a person sends dates in the wrong order, the better response would be a clear message
+              saying the dates are invalid. Instead, the system returned a more general error.
+            </p>
+            <p>
+              So the feature mostly works, but the error handling in this specific case is still rough
+              and should be improved.
+            </p>
+          </ExplainMore>
         </section>
 
         <section className="testing-explained__section">
@@ -371,6 +537,18 @@ export default function TestingExplained() {
               </p>
             </article>
           </div>
+          <ExplainMore>
+            <p>
+              The short version is this: most of the important parts worked, but not every part worked equally well.
+            </p>
+            <p>
+              The website features were mostly fine. The basic safety checks were also fine. Normal speed was fine.
+            </p>
+            <p>
+              The weaker areas were prediction quality in the harder price patterns, clearer handling of wrong input,
+              and stability when the system was hit with a sudden heavy burst of prediction requests.
+            </p>
+          </ExplainMore>
         </section>
 
         <section className="testing-explained__section">
@@ -382,6 +560,19 @@ export default function TestingExplained() {
             Farm2Market works as a prototype and that most important features are in place, but the
             prediction setup and heavier-load handling still need more work.
           </p>
+          <ExplainMore>
+            <p>
+              If someone asks, “is the project working?” the honest answer is yes, mostly.
+            </p>
+            <p>
+              If someone asks, “is it perfect?” the honest answer is no.
+            </p>
+            <p>
+              The testing shows that Farm2Market is good enough to demonstrate as a working prototype,
+              but it still needs more improvement if the goal is stronger forecasting and better behavior
+              under heavier pressure.
+            </p>
+          </ExplainMore>
         </section>
 
         <footer className="testing-explained__source-note">

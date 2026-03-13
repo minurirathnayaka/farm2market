@@ -46,6 +46,9 @@ const OrdersDashboard = lazy(() =>
 const OrderDetailDashboard = lazy(() =>
   import("../pages/Dashboards/Orders/OrderDetailDashboard")
 );
+const AdminControlCenter = lazy(() =>
+  import("../pages/Admin/AdminControlCenter")
+);
 
 /* ======================================================
    Shared fallbacks
@@ -198,6 +201,16 @@ const router = createBrowserRouter([
         ),
       },
     ],
+  },
+
+  {
+    path: "/admin",
+    element: (
+      <Suspense fallback={<PageLoader />}>
+        <AdminControlCenter />
+      </Suspense>
+    ),
+    errorElement: <RouteError />,
   },
 
   /* =========================
